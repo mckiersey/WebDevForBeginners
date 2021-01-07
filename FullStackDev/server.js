@@ -1,6 +1,3 @@
-// We need to create a bunch of variables to set up the server
-// const is (one of the ways) to create variables in javascript
-
 const express = require('express');
 const app = express();
 const port = 80;
