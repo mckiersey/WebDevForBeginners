@@ -6,13 +6,11 @@ const router = app => {
     });
 
 
-    app.get('/lyrics', (request, response)=>{
-        response.send("And that smell of sweet perfume comes drifting through The cool night air like Shalimar")
+    app.get('/home', (request, response)=>{
+        response.sendFile("/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/homepage.html")
     });
 
-    app.get('/name', (request, response)=>{
-        response.send('hey [put your name here], are you getting the hang of this yet?')
-    })
+
 
 };
 module.exports = router;
