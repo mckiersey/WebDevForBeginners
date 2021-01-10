@@ -13,11 +13,33 @@ const router = app => {
         response.sendFile("/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/homepage.html")
     });
 
-    pool.query('SELECT * FROM user_profile;', function (err, result, fields) {
-        if (err) throw new Error(err)
-        // Do something with result.
-    })
+ 
 
+
+
+    // POST NEW USER TO DATABASE
+
+    app.post('/newUser', async (request, response) => {
+    try {
+        var NewuserName = request.body.userName
+        var Newpassword = request.body.password
+
+        pool.query("SELECT ACCOUNT_ID FROM registration WHERE ACCOUNT_ID = '"+ userAccnt +"'", function(err, result, field){
+            if(result.lenght === 0){
+               //new user logic
+               pool.query(`INSERT INTO user_profile (user, password) VALUES("${NewuserName}", '${Newpassword}');`, (error, result) => {
+                if (error) throw error;
+                console.log('error type:', error);
+                console.log('Post Success!');
+                });  
+            }else{  
+                //existing user,
+                response.send("User already exists");
+            }  
+    } catch {
+        response.status(500).send('Error')
+    }
+    
 
 
 };
