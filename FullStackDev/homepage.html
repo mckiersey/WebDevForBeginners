@@ -4,7 +4,7 @@
           <title>Web dev for absolute beginners</title>    
           <script src="https://apis.google.com/js/platform.js" async defer></script>
           <meta name="google-signin-client_id" content="170958026096-1delfs3g8tg4hoeg6bgs5ickhpe7k5pt.apps.googleusercontent.com">
-
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"type="text/javascript"></script>
     </head>
     <body>
         <h1>Full stack front end dev</h1>
@@ -15,17 +15,39 @@
             width="560" height="315" src="https://www.youtube.com/embed/mceI44LrEKk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe>
         <h2>Adding a sign in button</h2>
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+        <div class="g-signin2" data-onsuccess="onSignIn" id = 'signIn'></div>
     </html>
 
     <script>
+
         function onSignIn(googleUser) {
             var profile = googleUser.getBasicProfile();
             console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
             console.log('Name: ' + profile.getName());
             console.log('Image URL: ' + profile.getImageUrl());
             console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+            //Sign up: We want to 'post' the user data back to the server
+       
+            //event.preventDefault(); <-- what does this do?
+            var userName = profile.getName();
+            var userEmail = profile.getEmail();
+            var image = profile.getImageUrl();
+                
+            console.log('new user is:', userName,'the email is: ', userEmail, 'and the picture is', image)
+
+
+            // POST NEW USER TO BACK END;
+            var postUrl = `http://localhost:80/newUser`
+                    // Send the data using post;
+                    $.post(postUrl, { userName: userName, userEmail: userEmail, userProfilePicture: image })
+                    .done(function (data) {
+                        console.log('success sign up clause')
+                    });   
         }
+
+            
+       
+           
     </script>
 
 </body>
