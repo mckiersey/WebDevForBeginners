@@ -39,10 +39,18 @@
             // POST NEW USER TO BACK END;
             var postUrl = `http://localhost:80/newUser`
                     // Send the data using post;
-                    $.post(postUrl, { userName: userName, userEmail: userEmail, userProfilePicture: image })
-                    .done(function (data) {
-                        console.log('success sign up clause')
-                    });   
+                    try{
+                        console.log('trying to send ot back end')
+                        $.post(postUrl, { userName: userName, userEmail: userEmail, userProfilePicture: image })
+                        .done(function (data) {
+                            console.log('success sign up clause- data posted to backend')
+                        });
+                        console.log('hello')   
+                    }catch(err){     
+                        console.log('failed to post to backend')
+                        response.send('Error: ' + err)     
+                    }    
+
         }
 
             

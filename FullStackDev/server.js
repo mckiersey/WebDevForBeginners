@@ -3,6 +3,13 @@ const app = express();
 const port = 80;
 const path = require('path');
 const routes = require('./routes.js');
+const bodyParser = require('body-parser') 
+
+// Add body parser for routes.js file
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
 
 

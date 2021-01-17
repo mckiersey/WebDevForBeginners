@@ -10,7 +10,18 @@ const router = app => {
 
 
     app.get('/home', (request, response)=>{
-        response.sendFile("/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/homepage.html")
+        homepage_file = "/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/homepage.html"
+        response.sendFile(homepage_file)
+    });
+
+    app.get('/users', (request, response)=>{
+        pool.query(`SELECT * FROM auth_data`, (error, result)=> {
+        if(error) throw error;
+
+        response.send(result);
+        console.log('all users: ' + result);
+        });
+    
     });
 
  
@@ -19,26 +30,42 @@ const router = app => {
 
     // POST NEW USER TO DATABASE
 
-    app.post('/newUser', async (request, response) => {
-    try {
-        var NewuserName = request.body.userName
-        var Newpassword = request.body.password
+    // need to get safe user if from google (id token??)
 
-        pool.query("SELECT ACCOUNT_ID FROM registration WHERE ACCOUNT_ID = '"+ userAccnt +"'", function(err, result, field){
-            if(result.lenght === 0){
-               //new user logic
-               pool.query(`INSERT INTO user_profile (user, password) VALUES("${NewuserName}", '${Newpassword}');`, (error, result) => {
-                if (error) throw error;
-                console.log('error type:', error);
-                console.log('Post Success!');
-                });  
-            }else{  
-                //existing user,
-                response.send("User already exists");
-            }  
-    } catch {
-        response.status(500).send('Error')
-    }
+    app.post('/newUser', async (request, response) => {
+        console.log(request.body)
+            var NewUserId = 3 //CHANGE
+            var NewuserName = request.body.userName
+            var NewuserEmail = request.body.userEmail
+            //var NewProfilePicture = request.body.userProfilePicture
+            var NewUserDetails = {user_id: NewUserId,  email: NewuserEmail}
+            console.log('checking new user:', NewUserDetails)
+                // check if user already exists in database
+            try{
+                pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", NewUserId, function(error, result, field){
+                    if (error) throw error;
+                    console.log('error type:', error);
+
+                    if(result.length === 0){
+                        console.log('inserting new user')
+                        //new user logic
+                        pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
+                            console.log('Post Success!');
+                            console.log('User ' + NewUserId + 'Written to database')
+                        if (error) throw error;
+                        console.log('error type:', error);
+                        });  
+                    }else{  
+                        //existing user,
+                        console.log("User already exists");
+
+                        response.send("User already exists");
+                    }
+                });       
+        } catch (err) {
+            console.log('backend fail' + err)
+        }
+    })  
     
 
 
