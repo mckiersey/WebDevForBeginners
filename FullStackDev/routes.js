@@ -1,5 +1,8 @@
 // LINK TO DATABASE CONNECTION
 const pool = require('./config.js')
+const CLIENT_ID = '170958026096-1delfs3g8tg4hoeg6bgs5ickhpe7k5pt.apps.googleusercontent.com'
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(CLIENT_ID);
 
 // DEFINE APP
 const router = app => {
@@ -34,11 +37,33 @@ const router = app => {
 
     app.post('/newUser', async (request, response) => {
         console.log(request.body)
-            var NewUserId = 3 //CHANGE
+            var token = request.body.token
             var NewuserName = request.body.userName
             var NewuserEmail = request.body.userEmail
-            //var NewProfilePicture = request.body.userProfilePicture
-            var NewUserDetails = {user_id: NewUserId,  email: NewuserEmail}
+
+            //token = NewUserId
+            // Check authenticity of user id
+                const client = new OAuth2Client(CLIENT_ID);
+
+                    async function verify() {
+                    const ticket = await client.verifyIdToken({
+                        idToken: token,
+                        audience: CLIENT_ID,  
+                    });
+                    const payload = ticket.getPayload();
+                    const userid = payload['sub'];
+                    console.log('id verified!')
+                    }
+                verify().catch('error caught:', console.error);
+                });
+
+
+
+
+
+/*
+
+            var NewUserDetails = {user_id: userid,  email: NewuserEmail}
             console.log('checking new user:', NewUserDetails)
                 // check if user already exists in database
             try{
@@ -51,7 +76,7 @@ const router = app => {
                         //new user logic
                         pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
                             console.log('Post Success!');
-                            console.log('User ' + NewUserId + 'Written to database')
+                            //console.log('User ' + NewUserId + 'Written to database')
                         if (error) throw error;
                         console.log('error type:', error);
                         });  
@@ -65,8 +90,9 @@ const router = app => {
         } catch (err) {
             console.log('backend fail' + err)
         }
+        
     })  
-    
+    */
 
 
 };
