@@ -34,66 +34,51 @@ const router = app => {
     // POST NEW USER TO DATABASE
 
     // need to get safe user if from google (id token??)
-
     app.post('/newUser', async (request, response) => {
         console.log(request.body)
             var token = request.body.token
             var NewuserName = request.body.userName
             var NewuserEmail = request.body.userEmail
 
-            //token = NewUserId
             // Check authenticity of user id
                 const client = new OAuth2Client(CLIENT_ID);
-
                     async function verify() {
                     const ticket = await client.verifyIdToken({
                         idToken: token,
                         audience: CLIENT_ID,  
                     });
-                    const payload = ticket.getPayload();
-                    const userid = payload['sub'];
                     console.log('id verified!')
-                    }
-                verify().catch('error caught:', console.error);
-                });
 
+                    const payload = ticket.getPayload();
+                    const SubmittedUserId = payload['sub'];
+                                    
+                    var NewUserDetails = {user_id: SubmittedUserId,  email: NewuserEmail}
+                    // check if user already exists in database
+                    try{
+                        pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", SubmittedUserId, function(error, result, field){
+                            if (error) throw error;
+                            console.log('error type:', error);
 
-
-
-
-/*
-
-            var NewUserDetails = {user_id: userid,  email: NewuserEmail}
-            console.log('checking new user:', NewUserDetails)
-                // check if user already exists in database
-            try{
-                pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", NewUserId, function(error, result, field){
-                    if (error) throw error;
-                    console.log('error type:', error);
-
-                    if(result.length === 0){
-                        console.log('inserting new user')
-                        //new user logic
-                        pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
-                            console.log('Post Success!');
-                            //console.log('User ' + NewUserId + 'Written to database')
-                        if (error) throw error;
-                        console.log('error type:', error);
-                        });  
-                    }else{  
-                        //existing user,
-                        console.log("User already exists");
-
-                        response.send("User already exists");
-                    }
-                });       
-        } catch (err) {
-            console.log('backend fail' + err)
-        }
-        
-    })  
-    */
-
+                            if(result.length === 0){
+                                console.log('inserting new user')
+                                //new user logic
+                                pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
+                                    console.log('User ' + SubmittedUserId + 'Written to database')
+                                    if (error) throw error;
+                                    console.log('error type:', error);
+                                });  
+                            }else{  
+                                    response.send("User already exists");
+                                    }  
+                        }); 
+                            
+                    } catch (err) {
+                        console.log('backend fail: ' + err)
+                    }    
+                }
+                verify().catch('error caught:', console.error); // end of verify async function
+            });   
+    
 
 };
 module.exports = router;
