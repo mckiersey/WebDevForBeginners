@@ -28,13 +28,11 @@ const router = app => {
     });
 
  
-
+// https://stackoverflow.com/a/65006287/6065710 - getting tokens
 
 
     // POST NEW USER TO DATABASE
-
-    // need to get safe user if from google (id token??)
-    app.post('/newUser', async (request, response) => {
+    app.post('/NewUser', async (request, response) => {
         console.log(request.body)
             var token = request.body.token
             var NewuserName = request.body.userName
@@ -50,12 +48,12 @@ const router = app => {
                     console.log('id verified!')
 
                     const payload = ticket.getPayload();
-                    const SubmittedUserId = payload['sub'];
+                        const SubmittedUserId = payload['sub'];
                                     
                     var NewUserDetails = {user_id: SubmittedUserId,  email: NewuserEmail}
                     // check if user already exists in database
                     try{
-                        pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", SubmittedUserId, function(error, result, field){
+                        pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", SubmittedUserId   , function(error, result, field){
                             if (error) throw error;
                             console.log('error type:', error);
 
@@ -63,12 +61,12 @@ const router = app => {
                                 console.log('inserting new user')
                                 //new user logic
                                 pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
-                                    console.log('User ' + SubmittedUserId + 'Written to database')
+                                    response.send('New User ' + SubmittedUserId + ' Written to database')
                                     if (error) throw error;
                                     console.log('error type:', error);
                                 });  
                             }else{  
-                                    response.send("User already exists");
+                                    response.send("Existing user- signing in");
                                     }  
                         }); 
                             

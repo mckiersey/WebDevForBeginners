@@ -6,6 +6,11 @@ const routes = require('./routes.js');
 const bodyParser = require('body-parser') 
 const {OAuth2Client} = require('google-auth-library');
 
+// middlewear
+app.set('view engine', 'ejs')
+app.use(express.json());
+app.use(cookieParser());
+
 
 
 

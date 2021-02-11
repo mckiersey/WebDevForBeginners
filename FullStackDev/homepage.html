@@ -21,29 +21,28 @@
     <script>
 
         function onSignIn(googleUser) {
+            /*
             var profile = googleUser.getBasicProfile();
-            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-            console.log('Name: ' + profile.getName());
-            console.log('Image URL: ' + profile.getImageUrl());
-            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-       
-            var id_token = googleUser.getAuthResponse().id_token;
+            
             var userName = profile.getName();
             var userEmail = profile.getEmail();
             var image = profile.getImageUrl();
+            */
+            var id_token = googleUser.getAuthResponse().id_token;
+           
                 
             console.log('new user is:', userName,'the ID is',id_token, 'the email is: ', userEmail, 'and the picture is', image)
 
 
             // POST NEW USER TO BACK END;
-            var postUrl = `http://localhost:80/newUser`
+            var postUrl = `http://localhost:80/NewUser`
                     // Send the data using post;
                     try{
-                        $.post(postUrl, {token: id_token, userName: userName, userEmail: userEmail, userProfilePicture: image })
+                        $.post(postUrl, JSON.stringify({token: id_token}))
                         .done(function (data) {
-                            console.log('success sign up clause- data posted to backend')
+                            console.log('Server response :', data)   
+
                         });
-                        console.log('hello')   
                     }catch(err){     
                         console.log('failed to post to backend')
                         response.send('Error: ' + err)     
