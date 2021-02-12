@@ -1,58 +1,106 @@
 <!DOCTYPE html>
 <html>
-    <head>
-          <title>Web dev for absolute beginners</title>    
-          <script src="https://apis.google.com/js/platform.js" async defer></script>
-          <meta name="google-signin-client_id" content="170958026096-1delfs3g8tg4hoeg6bgs5ickhpe7k5pt.apps.googleusercontent.com">
-          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"type="text/javascript"></script>
-    </head>
-    <body>
-        <h1>Full stack front end dev</h1>
-        <p1>First step towards your website- nice one!</p1>     
 
-        <h2>Adding content to our website</h2>
-        <iframe 
-            width="560" height="315" src="https://www.youtube.com/embed/mceI44LrEKk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-        </iframe>
-        <h2>Adding a sign in button</h2>
-        <div class="g-signin2" data-onsuccess="onSignIn" id = 'signIn'></div>
-    </html>
+<head>
+    <title>Web dev for absolute beginners</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id"
+        content="170958026096-1delfs3g8tg4hoeg6bgs5ickhpe7k5pt.apps.googleusercontent.com">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" type="text/javascript"></script>
+</head>
 
-    <script>
+<body>
+    <h1>Full stack front end dev</h1>
+    <p1>First step towards your website- nice one!</p1>
 
-        function onSignIn(googleUser) {
-            /*
-            var profile = googleUser.getBasicProfile();
-            
-            var userName = profile.getName();
-            var userEmail = profile.getEmail();
-            var image = profile.getImageUrl();
-            */
-            var id_token = googleUser.getAuthResponse().id_token;
-           
-                
-            console.log('new user is:', userName,'the ID is',id_token, 'the email is: ', userEmail, 'and the picture is', image)
+    <h2>Adding content to our website</h2>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/mceI44LrEKk" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+    </iframe>
+    <h2>Adding a sign in button</h2>
+    <div class="g-signin2" data-onsuccess="onSignIn" id='signIn'></div>
+
+    <h2>Adding a sign out button</h2>
+    <a href="#" onclick="signOut();">Sign out</a>
+
+    <h2>Adding a USER A BUTTON</h2>
+    <a href="#" onclick="userA();">USER A</a>
+
+</html>
+
+<script>
+    function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+            console.log('User signed out.');
+        });
+    }
+
+    // GET COOKIE FUNCTION
+    function getCookieValue(cname) { // cname is nothing but the cookie value which 
+        //contains the value
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    // USER A function
+    function userA() {
+        var postUrl = `http://localhost:80/userA`
+        // Send the data using post;
+        var cookieToken = getCookieValue('MYSESSIONTOKEN')
+
+        console.log('cookie token = ', cookieToken)
+        try {
+            $.post(postUrl, {
+                    token: cookieToken
+                })
+                .done(function (data) {
+                    console.log('Server response :', data)
+
+                });
+        } catch (err) {
+            console.log('failed to post to backend')
+            response.send('Error: ' + err)
+        }
+    }
 
 
-            // POST NEW USER TO BACK END;
-            var postUrl = `http://localhost:80/NewUser`
-                    // Send the data using post;
-                    try{
-                        $.post(postUrl, JSON.stringify({token: id_token}))
-                        .done(function (data) {
-                            console.log('Server response :', data)   
+    function onSignIn(googleUser) {
 
-                        });
-                    }catch(err){     
-                        console.log('failed to post to backend')
-                        response.send('Error: ' + err)     
-                    }    
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log('TOKEN = ', id_token)
 
+
+
+        // POST NEW USER TO BACK END;
+        var postUrl = `http://localhost:80/login`
+        // Send the data using post;
+        try {
+            $.post(postUrl, {
+                    token: id_token
+                })
+                .done(function (data) {
+                    console.log('Server response :', data)
+
+                });
+        } catch (err) {
+            console.log('failed to post to backend')
+            response.send('Error: ' + err)
         }
 
-            
-       
-           
-    </script>
+    }
+</script>
 
 </body>
