@@ -24,22 +24,27 @@
     <h2>Adding a sign out button</h2>
     <a href="#" onclick="signOut();">Sign out</a>
 
-    <h2>Adding a USER A BUTTON</h2>
-    <a href="#" onclick="userA();">USER A</a>
+    <h2>Adding a Protected Route button</h2>
+    <a href="#" onclick="ProtectedRoute();">Protected Route</a>
 
 </html>
 
 <script>
     function signOut() {
-        var auth2 = gapi.auth2.getAuthInstance();
-        auth2.signOut().then(function () {
-            console.log('User signed out.');
-        });
+        var getUrl = `http://localhost:80/SignOut`
+        try {
+            $.get(getUrl, {})
+                .done(function (data) {
+                    console.log('Sign out server response :', data)
+                });
+        } catch (err) {
+            console.log('failed to post to backend')
+            response.send('Error: ' + err)
+        }
     }
 
     // GET COOKIE FUNCTION
-    function getCookieValue(cname) { // cname is nothing but the cookie value which 
-        //contains the value
+    function getCookieValue(cname) {
         var name = cname + "=";
         var decodedCookie = decodeURIComponent(document.cookie);
         var ca = decodedCookie.split(';');
@@ -55,13 +60,11 @@
         return "";
     }
 
-    // USER A function
-    function userA() {
-        var postUrl = `http://localhost:80/userA`
+    // A protected route function
+    function ProtectedRoute() {
+        var postUrl = 'http://localhost:80/ProtectedRoute'
         // Send the data using post;
-        var cookieToken = getCookieValue('MYSESSIONTOKEN')
-
-        console.log('cookie token = ', cookieToken)
+        var cookieToken = getCookieValue('USER_SESSION_TOKEN')
         try {
             $.post(postUrl, {
                     token: cookieToken
@@ -78,14 +81,10 @@
 
 
     function onSignIn(googleUser) {
-
         var id_token = googleUser.getAuthResponse().id_token;
-        console.log('TOKEN = ', id_token)
-
-
 
         // POST NEW USER TO BACK END;
-        var postUrl = `http://localhost:80/login`
+        var postUrl = `http://localhost:80/SignIn`
         // Send the data using post;
         try {
             $.post(postUrl, {

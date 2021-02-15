@@ -20,7 +20,7 @@ async function verify(CLIENT_ID, token) {
             idToken: token,
             audience: CLIENT_ID
         });
-        console.log('post verification')
+        console.log('User Verified')
 
         const payload = ticket.getPayload();
         console.log(payload)
@@ -66,7 +66,7 @@ const router = app => {
     });
 
     // An API CALL THAT REQUIRES VERIFICATION FIRST
-    app.post('/userA', async (request, response) => {
+    app.post('/ProtectedRoute', async (request, response) => {
         token = request.body.token
 
         console.log('token = ', token)
@@ -75,15 +75,17 @@ const router = app => {
         if (!user) { //if verify function returns false (not user)
             console.log('User not logged in')
             response.send('User not logged in')
+            res.redirect('/home')
 
             // add login redirect           
         } else {
             // next logic
             console.log('verified user: ', user)
             // example: protected query
+
+            //TO DO: REPLACE WITH PROFILE PAGE AND DATA
             pool.query(`SELECT * FROM auth_data`, (error, result) => {
                 if (error) throw error;
-
                 response.send(result);
                 console.log('all users: ' + result);
             });
@@ -94,19 +96,20 @@ const router = app => {
     // https://stackoverflow.com/a/65006287/6065710 - getting tokens
 
     // LOGOUT
-    app.get('/logout', (req, res) => {
-        res.clearCookie('session-token');
+    app.get('/SignOut', (req, res) => {
+        console.log('Sign Out route')
+        res.clearCookie('USER_SESSION_TOKEN');
+        res.send('User cookies deleted')
         res.redirect('/home')
 
     })
 
     // POST NEW USER TO DATABASE
-    app.post('/login', async (request, response) => {
-        console.log('login api call: ', request.body)
+    app.post('/SignIn', async (request, response) => {
 
         let token = request.body.token
-        response.cookie('MYSESSIONTOKEN', token) // passing a verified token to the browser
-        response.send('Token set');
+        response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
+        response.send('Token set- user logged in & session started'); // THIS ISNT CORRECT- NEED TO VERIFY BEFORE STARTING A SESSION
         console.log('token set')
 
         //var NewuserName = request.body.userName
