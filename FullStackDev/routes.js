@@ -55,6 +55,14 @@ const router = app => {
         response.sendFile(homepage_file)
     });
 
+
+
+
+    app.get('/ProtectedProfile', (request, response) => {
+        LandingPage_file = "/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/profile.html"
+        response.sendFile(LandingPage_file)
+    })
+
     app.get('/users', (request, response) => {
         pool.query(`SELECT * FROM auth_data`, (error, result) => {
             if (error) throw error;
@@ -74,21 +82,16 @@ const router = app => {
         console.log('value of verify function: ', user)
         if (!user) { //if verify function returns false (not user)
             console.log('User not logged in')
-            response.send('User not logged in')
-            res.redirect('/home')
+            //response.send('User not logged in')
+            response.send('/LandingPage')
+
 
             // add login redirect           
         } else {
             // next logic
             console.log('verified user: ', user)
-            // example: protected query
-
-            //TO DO: REPLACE WITH PROFILE PAGE AND DATA
-            pool.query(`SELECT * FROM auth_data`, (error, result) => {
-                if (error) throw error;
-                response.send(result);
-                console.log('all users: ' + result);
-            });
+            // example: protected page
+            response.send('/ProtectedProfile')
         }
 
     });
@@ -96,13 +99,28 @@ const router = app => {
     // https://stackoverflow.com/a/65006287/6065710 - getting tokens
 
     // LOGOUT
+    /*
     app.get('/SignOut', (req, res) => {
         console.log('Sign Out route')
         res.clearCookie('USER_SESSION_TOKEN');
-        res.send('User cookies deleted')
-        res.redirect('/home')
+        //res.send('User cookies deleted')
+        res.redirect('/LandingPage')
 
     })
+    */
+
+    app.get('/LandingPage', (req, res) => {
+        console.log('redirect to landing page')
+        res.render('LandingPage');
+    })
+
+    app.get('/SignOut', (req, res) => {
+        console.log('sign out route')
+        res.clearCookie('USER_SESSION_TOKEN');
+        res.redirect('/LandingPage')
+
+    })
+
 
     // POST NEW USER TO DATABASE
     app.post('/SignIn', async (request, response) => {
