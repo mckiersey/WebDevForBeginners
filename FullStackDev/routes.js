@@ -1,5 +1,6 @@
 // LINK TO DATABASE CONNECTION
 const pool = require('./config.js')
+var path = require("path");
 
 // google auth
 const { OAuth2Client } = require('google-auth-library');
@@ -24,9 +25,9 @@ async function verify(CLIENT_ID, token) {
 
         const payload = ticket.getPayload();
         console.log(payload)
-        const SubmittedUserId = payload['sub'];
+        const AuthUserId = payload['sub'];
         const UserName = payload.name
-        return SubmittedUserId
+        return AuthUserId
 
     } catch (error) {
         console.log('im in verify false')
@@ -56,12 +57,21 @@ const router = app => {
     });
 
 
+    app.get('/ProtectedProfileredirect', (request, response) => {
+        console.log('middleware')
+        response.redirect(301, '/ProtectedProfile');
+    });
 
+    app.get('/logout', function (req, res) {
+        res.redirect('/');
+    });
 
     app.get('/ProtectedProfile', (request, response) => {
-        LandingPage_file = "/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/profile.html"
-        response.sendFile(LandingPage_file)
+        console.log('in protected profile get request')
+        response.render("ProtectedProfile.ejs", { message: "im tired of this shit" });
     })
+
+
 
     app.get('/users', (request, response) => {
         pool.query(`SELECT * FROM auth_data`, (error, result) => {
@@ -83,7 +93,6 @@ const router = app => {
         if (!user) { //if verify function returns false (not user)
             console.log('User not logged in')
             //response.send('User not logged in')
-            response.send('/LandingPage')
 
 
             // add login redirect           
@@ -91,7 +100,7 @@ const router = app => {
             // next logic
             console.log('verified user: ', user)
             // example: protected page
-            response.send('/ProtectedProfile')
+            response.redirect(301, '/ProtectedProfileRedirect');
         }
 
     });
@@ -105,7 +114,7 @@ const router = app => {
         res.clearCookie('USER_SESSION_TOKEN');
         //res.send('User cookies deleted')
         res.redirect('/LandingPage')
-
+    
     })
     */
 
@@ -135,10 +144,10 @@ const router = app => {
 
     });
     /*
-            var NewUserDetails = { user_id: SubmittedUserId, email: NewuserEmail }
+            var NewUserDetails = { auth_user_id: AuthUserId, email: NewuserEmail }
             // check if user already exists in database
             try {
-                pool.query("SELECT user_id FROM auth_data WHERE user_id = ?", SubmittedUserId, function (error, result, field) {
+                pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
                     if (error) throw error;
                     console.log('error type:', error);
     
@@ -146,7 +155,7 @@ const router = app => {
                         console.log('inserting new user')
                         //new user logic
                         pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
-                            response.send('New User ' + SubmittedUserId + ' Written to database')
+                            response.send('New User ' + AuthUserId + ' Written to database')
                             if (error) throw error;
                             console.log('error type:', error);
                         });

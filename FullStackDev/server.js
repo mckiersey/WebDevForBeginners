@@ -10,14 +10,15 @@ cookieParser = require('cookie-parser');
 
 
 // middlewear
-app.set('view engine', 'ejs')
+// Setting the view engine
+//app.set('views', path.join(__dirname, 'views'));  // add this one, change 'views' for your folder name if needed.
+app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static('public')); //delete me
 
 
 // view engine
-app.set('views', '/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/views');
+//app.set('views', '/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/views');
 
 
 // Add body parser for routes.js file
