@@ -64,49 +64,55 @@ const router = app => {
         google_user_id = await verify(CLIENT_ID, token)
 
         console.log('value of verify function: ', google_user_id)
-        if (!google_user_id) {
+        if (!google_user_id) { // if value == false
             response.send('* Token verification FAIL: User not logged in *')
 
         } else {
             response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
-            response.send('* Token verification SUCCESS: User logged in *')
+            //response.send('* Token verification SUCCESS: User logged in *')
+            var AuthUserId = google_user_id[0]
+            var AuthUserName = google_user_id[1]
+            var AuthUserFirstName = AuthUserName.split(" ", 1)[0]
+            var AuthUserEmail = google_user_id[2]
+            var AuthUserImage = google_user_id[3]
+            console.log('Authenticated user details: ', AuthUserFirstName, AuthUserName, AuthUserEmail, AuthUserImage, AuthUserId)
 
-        }
-
-        //var NewuserName = request.body.userName
-        //var NewuserEmail = request.body.userEmail
-
-    });
-    /*
-            var NewUserDetails = { auth_user_id: AuthUserId, email: NewuserEmail }
+            var AuthUserData = { auth_user_id: AuthUserId, email: AuthUserEmail }
+            var AuthUserProfile = { first_name: AuthUserFirstName, full_name: AuthUserName, profile_picture: AuthUserImage }
             // check if user already exists in database
+
             try {
                 pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
                     if (error) throw error;
-                    console.log('error type:', error);
-    
+                    console.log('Query if user exists error type:', error);
+                    console.log('query if user exists result: ', result)
+
                     if (result.length === 0) {
-                        console.log('inserting new user')
-                        //new user logic
-                        pool.query('INSERT INTO auth_data SET ?', NewUserDetails, (error, result) => {
-                            response.send('New User ' + AuthUserId + ' Written to database')
+                        console.log('inserting new user to auth db')
+                        // TABLE: AUTH_DATA
+                        pool.query('INSERT INTO auth_data SET ?', AuthUserData, (error, result) => {
                             if (error) throw error;
-                            console.log('error type:', error);
+                            console.log('Authentication DB error: ', error);
                         });
+                        //TABLE: USER_PROFILE
+                        pool.query('INSERT INTO user_profile SET?', AuthUserProfile, (error, result) => {
+                            if (error) throw error;
+                            console.log('User profile DB error: ', error)
+                        });
+
                     } else {
+                        console.log('Existing user')
                         response.send("Existing user- signing in");
                     }
                 });
-    
+
             } catch (err) {
                 console.log('backend fail: ' + err)
             }
-            
         }
-        
-    
-        )
-        */
+    });
+
+
 
     app.get('/users', (request, response) => {
         pool.query(`SELECT * FROM auth_data`, (error, result) => {
@@ -124,7 +130,7 @@ const router = app => {
 
         google_user_id = await verify(CLIENT_ID, token)
         console.log('value of verify function: ', google_user_id)
-        if (!google_user_id) {
+        if (!google_user_id) { //if value == false
             response.send('* Token verification FAIL: User not logged in *')
         } else {
             response.send('* Token verification SUCCESS: User logged in *')
