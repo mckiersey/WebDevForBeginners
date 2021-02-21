@@ -17,6 +17,8 @@
     <h1>Full stack front end dev</h1>
     <p1>First step towards your website- nice one!</p1>
 
+    <h2 id='AuthStatus'></h2>
+
     <h2>Adding content to our website</h2>
     <iframe id="video" width=" 560" height="315" src="https://www.youtube.com/embed/mceI44LrEKk" allow="clipboard-read"
         frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -47,25 +49,6 @@
 </html>
 
 <script>
-    (function () {
-        new Clipboard('#VanMorrisonButton');
-    })();
-
-
-
-    function signOut() {
-        var getUrl = `http://localhost:80/logout`
-        try {
-            $.get(getUrl, {})
-                .done(function (data) {
-                    console.log('Sign out server response :', data)
-                });
-        } catch (err) {
-            console.log('failed to post to backend')
-            response.send('Error: ' + err)
-        }
-    }
-
     // GET COOKIE FUNCTION
     function getCookieValue(cname) {
         var name = cname + "=";
@@ -82,46 +65,77 @@
         }
         return "";
     }
+    //Auth status
+    var cookieToken = getCookieValue('USER_SESSION_TOKEN')
+    console.log('cookie token value:', cookieToken)
+    if (cookieToken == "") {
+        document.getElementById('AuthStatus').innerHTML = "<span style='color: red;'>Not Signed in</span>";
+    } else {
+        document.getElementById('AuthStatus').innerHTML = "<span style='color: green;''>Signed in</span>";
+        document.getElementById('AuthStatus').style.colour = "Green"
+
+    }
+
+    (function () {
+        new Clipboard('#VanMorrisonButton');
+    })();
+
+    //SIGN IN/ SIGN UP 
+    function onSignIn(googleUser) {
+        var id_token = googleUser.getAuthResponse().id_token;
+        // POST NEW USER TO BACK END;
+        try {
+            $.post('http://localhost:80/SignIn', {
+                token: id_token
+            }).done(function (data) {
+                console.log('Server response :', data)
+            });
+        } catch (err) {
+            console.log('failed to post to backend')
+            response.send('Error: ' + err)
+        }
+
+    }
 
     // A protected route function
     function ProtectedRoute() {
-        var postUrl = 'http://localhost:80/ProtectedRoute'
-        // Send the data using post;
-        var cookieToken = getCookieValue('USER_SESSION_TOKEN')
+        // Get token from browser
+        var CookieToken = getCookieValue('USER_SESSION_TOKEN')
         try {
-            $.post(postUrl, {
-                    token: cookieToken
-                })
-                .done(function (data) {
+            $.post('http://localhost:80/ProtectedRoute', {
+                token: CookieToken
+            }).done(function (data) {
+                if (data == '* Token verification SUCCESS: User logged in *') {
                     console.log('Server response :', data)
+                    window.location.href = 'http://localhost:80/ProtectedProfile'
+                } else {
+                    console.log('Server response :', data)
+                    alert('Please sign in')
+                    window.location.href = 'http://localhost:80/Home'
 
-                });
+                };
+
+            });
         } catch (err) {
             console.log('failed to post to backend')
             response.send('Error: ' + err)
+            window.location.href = 'http://localhost:80/home'
+
         }
     }
 
-
-    function onSignIn(googleUser) {
-        var id_token = googleUser.getAuthResponse().id_token;
-
-        // POST NEW USER TO BACK END;
-        var postUrl = `http://localhost:80/SignIn`
-        // Send the data using post;
+    function signOut() {
+        var getUrl = `http://localhost:80/SignOut`
         try {
-            $.post(postUrl, {
-                    token: id_token
-                })
+            $.get(getUrl, {})
                 .done(function (data) {
-                    console.log('Server response :', data)
-
+                    console.log('Sign out server response :', data)
+                    window.location.href = "http://localhost:80/LoggedOutPage"
                 });
         } catch (err) {
             console.log('failed to post to backend')
             response.send('Error: ' + err)
         }
-
     }
 </script>
 

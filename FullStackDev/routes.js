@@ -25,9 +25,11 @@ async function verify(CLIENT_ID, token) {
 
         const payload = ticket.getPayload();
         console.log(payload)
-        const AuthUserId = payload['sub'];
-        const UserName = payload.name
-        return AuthUserId
+        const AuthUserId = payload.sub;
+        const UserName = payload.name;
+        const UserEmail = payload.email;
+        const UserPicture = payload.picture;
+        return [AuthUserId, UserName, UserEmail, UserPicture]
 
     } catch (error) {
         console.log('im in verify false')
@@ -56,88 +58,20 @@ const router = app => {
         response.sendFile(homepage_file)
     });
 
-
-    app.get('/ProtectedProfileredirect', (request, response) => {
-        console.log('middleware')
-        response.redirect(301, '/ProtectedProfile');
-    });
-
-    app.get('/logout', function (req, res) {
-        res.redirect('/');
-    });
-
-    app.get('/ProtectedProfile', (request, response) => {
-        console.log('in protected profile get request')
-        response.render("ProtectedProfile.ejs", { message: "im tired of this shit" });
-    })
-
-
-
-    app.get('/users', (request, response) => {
-        pool.query(`SELECT * FROM auth_data`, (error, result) => {
-            if (error) throw error;
-
-            response.send(result);
-            console.log('all users: ' + result);
-        });
-
-    });
-
-    // An API CALL THAT REQUIRES VERIFICATION FIRST
-    app.post('/ProtectedRoute', async (request, response) => {
-        token = request.body.token
-
-        console.log('token = ', token)
-        user = await verify(CLIENT_ID, token)
-        console.log('value of verify function: ', user)
-        if (!user) { //if verify function returns false (not user)
-            console.log('User not logged in')
-            //response.send('User not logged in')
-
-
-            // add login redirect           
-        } else {
-            // next logic
-            console.log('verified user: ', user)
-            // example: protected page
-            response.redirect(301, '/ProtectedProfileRedirect');
-        }
-
-    });
-
-    // https://stackoverflow.com/a/65006287/6065710 - getting tokens
-
-    // LOGOUT
-    /*
-    app.get('/SignOut', (req, res) => {
-        console.log('Sign Out route')
-        res.clearCookie('USER_SESSION_TOKEN');
-        //res.send('User cookies deleted')
-        res.redirect('/LandingPage')
-    
-    })
-    */
-
-    app.get('/LandingPage', (req, res) => {
-        console.log('redirect to landing page')
-        res.render('LandingPage');
-    })
-
-    app.get('/SignOut', (req, res) => {
-        console.log('sign out route')
-        res.clearCookie('USER_SESSION_TOKEN');
-        res.redirect('/LandingPage')
-
-    })
-
-
     // POST NEW USER TO DATABASE
     app.post('/SignIn', async (request, response) => {
-
         let token = request.body.token
-        response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
-        response.send('Token set- user logged in & session started'); // THIS ISNT CORRECT- NEED TO VERIFY BEFORE STARTING A SESSION
-        console.log('token set')
+        google_user_id = await verify(CLIENT_ID, token)
+
+        console.log('value of verify function: ', google_user_id)
+        if (!google_user_id) {
+            response.send('* Token verification FAIL: User not logged in *')
+
+        } else {
+            response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
+            response.send('* Token verification SUCCESS: User logged in *')
+
+        }
 
         //var NewuserName = request.body.userName
         //var NewuserEmail = request.body.userEmail
@@ -173,6 +107,51 @@ const router = app => {
     
         )
         */
+
+    app.get('/users', (request, response) => {
+        pool.query(`SELECT * FROM auth_data`, (error, result) => {
+            if (error) throw error;
+
+            response.send(result);
+            console.log('all users: ' + result);
+        });
+
+    });
+
+    // An API CALL THAT REQUIRES VERIFICATION FIRST
+    app.post('/ProtectedRoute', async (request, response) => {
+        token = request.body.token
+
+        google_user_id = await verify(CLIENT_ID, token)
+        console.log('value of verify function: ', google_user_id)
+        if (!google_user_id) {
+            response.send('* Token verification FAIL: User not logged in *')
+        } else {
+            response.send('* Token verification SUCCESS: User logged in *')
+        }
+    });
+
+    app.get('/ProtectedProfile', (request, response) => {
+        console.log('in protected profile get request')
+        response.render("ProtectedProfile.ejs", { message: "Private profile message" });
+    })
+
+
+    // https://stackoverflow.com/a/65006287/6065710 - getting tokens
+
+    app.get('/SignOut', (req, res) => {
+        console.log('sign out route')
+        res.clearCookie('USER_SESSION_TOKEN');
+        res.redirect('/LoggedOutPage')
+
+    })
+
+    app.get('/LoggedOutPage', (req, res) => {
+        console.log('redirect to landing page')
+        res.render('LandingPage');
+    })
+
+
 
 };
 module.exports = router;

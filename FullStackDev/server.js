@@ -4,14 +4,15 @@ const port = 80;
 const path = require('path');
 const routes = require('./routes.js');
 const bodyParser = require('body-parser')
+const cors = require('cors'); // From bookshelf
 cookieParser = require('cookie-parser');
+
 
 
 
 
 // middlewear
 // Setting the view engine
-//app.set('views', path.join(__dirname, 'views'));  // add this one, change 'views' for your folder name if needed.
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(cookieParser());
