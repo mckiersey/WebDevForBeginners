@@ -24,9 +24,6 @@
         frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
     </iframe>
-    <input class='SourceLink' id='VanMorrison' value="https://www.youtube.com/embed/mceI44LrEKk">
-    <button class="button" id="VanMorrisonButton" data-clipboard-target="#VanMorrison">Copy Van Morrison</button>
-
 
 
     <h2>Adding a sign in button</h2>
@@ -38,13 +35,6 @@
     <h2>Adding a Protected Route button</h2>
     <a href="#" onclick="ProtectedRoute();">Protected Route</a>
 
-
-    <style>
-        .SourceLink {
-            opacity: 0;
-            width: 0.1px;
-        }
-    </style>
 
 </html>
 
@@ -76,9 +66,7 @@
 
     }
 
-    (function () {
-        new Clipboard('#VanMorrisonButton');
-    })();
+
 
     //SIGN IN/ SIGN UP 
     function onSignIn(googleUser) {
