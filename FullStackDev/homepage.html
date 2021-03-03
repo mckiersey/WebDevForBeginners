@@ -71,6 +71,7 @@
     //SIGN IN/ SIGN UP 
     function onSignIn(googleUser) {
         var id_token = googleUser.getAuthResponse().id_token;
+        console.log("Token value to post to BE for validation: ", id_token)
         // POST NEW USER TO BACK END;
         try {
             $.post('http://localhost:80/SignIn', {
@@ -93,9 +94,22 @@
             $.post('http://localhost:80/ProtectedRoute', {
                 token: CookieToken
             }).done(function (data) {
-                if (data == '* Token verification SUCCESS: User logged in *') {
-                    console.log('Server response :', data)
-                    window.location.href = 'http://localhost:80/ProtectedProfile'
+                console.log('Server response :', data)
+                console.log('verification result:', data[0])
+                if (data[0] == '* Token verification SUCCESS: User logged in *') {
+                    alert('Verification success')
+                    googleUserID = data[1]
+
+                    // Redirect to protected profile
+                    var BaseProtectedUrl = `http://localhost/ProtectedProfile`
+                    var ProtectedUrl = BaseProtectedUrl + `?userId=${googleUserID}`
+                    console.log('The protected url is:', ProtectedUrl)
+                    window.location.href = ProtectedUrl
+                    $.get(ProtectedUrl, function (data, status) {
+                        console.log('Test server response :', data)
+                    });
+
+
                 } else {
                     console.log('Server response :', data)
                     alert('Please sign in')
@@ -128,3 +142,5 @@
 </script>
 
 </body>
+
+</html>

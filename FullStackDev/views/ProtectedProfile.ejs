@@ -3,6 +3,8 @@
 
 <head>
     <h1> This is a protected profile page.</h1>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
 </head>
 
 <body>
@@ -11,4 +13,40 @@
     </p>
     <div class="alert alert-danger"><%= message %></div>
 
-    <input type="button" onClick="location.href='http://localhost:80/home';" value="Go to home" </input> </body> </html>
+    <input type="button" onClick="location.href='http://localhost:80/home';" value="Go to home">
+</body>
+
+<script>
+    console.log('user id: ', googleUserID)
+    // GET COOKIE FUNCTION
+    function getCookieValue(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    /*
+    var BaseProtectedUrl = `http://localhost/UserData`
+
+    var ProtectedUrl = requestString + `?userName=${userName}`
+    console.log('The podcast url is:', urlParameters)
+
+    $.get(urlParameters, function (data, status) {
+    $.get(getUrl, {})
+        .done(function (data) {
+            console.log('Test server response :', data)
+        });
+        */
+</script>
+
+</html>
