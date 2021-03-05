@@ -52,7 +52,7 @@ const router = app => {
 
         } else {
             // **** COOKIE IS SET HERE ****
-            console.log('setting cookie: ', token)
+            console.log('setting cookie')
             response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser as a cookie
             console.log('cookie set')
 
@@ -61,7 +61,7 @@ const router = app => {
             var AuthUserFirstName = AuthUserName.split(" ", 1)[0]
             var AuthUserEmail = VerifiedTokenPayload[2]
             var AuthUserImage = VerifiedTokenPayload[3]
-            console.log('Authenticated user details: ', AuthUserFirstName, AuthUserName, AuthUserEmail, AuthUserImage, AuthUserId)
+            //console.log('Authenticated user details: ', AuthUserFirstName, AuthUserName, AuthUserEmail, AuthUserImage, AuthUserId)
 
             var AuthUserData = { auth_user_id: AuthUserId, email: AuthUserEmail }
             var AuthUserProfile = { first_name: AuthUserFirstName, full_name: AuthUserName, profile_picture: AuthUserImage }
@@ -159,12 +159,12 @@ const router = app => {
         console.log('request to delete this data:', UserToDelete);
         pool.query(`DELETE FROM auth_data WHERE email = '${UserToDelete}'`, (error, result) => {
             if (error) throw error;
-            console.log(response.result);
+            console.log('Delete response: ', response.result);
 
             //response.redirect('/SignOut') //to delete cookie
             pool.query(`SELECT * FROM auth_data`, (error, result) => {
                 if (error) throw error;
-                response.send(result);
+                response.send('Remaining users: ', result);
             });
         });
     });
