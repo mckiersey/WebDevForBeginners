@@ -51,30 +51,25 @@ const router = app => {
             response.send('* Token verification FAIL: User not logged in *')
 
         } else {
-            // **** COOKIE IS SET HERE ****
-            console.log('setting cookie')
-            response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser as a cookie
-            console.log('cookie set')
-
+            response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
             var AuthUserId = VerifiedTokenPayload[0]
             var AuthUserName = VerifiedTokenPayload[1]
             var AuthUserFirstName = AuthUserName.split(" ", 1)[0]
             var AuthUserEmail = VerifiedTokenPayload[2]
             var AuthUserImage = VerifiedTokenPayload[3]
-            //console.log('Authenticated user details: ', AuthUserFirstName, AuthUserName, AuthUserEmail, AuthUserImage, AuthUserId)
 
             var AuthUserData = { auth_user_id: AuthUserId, email: AuthUserEmail }
             var AuthUserProfile = { first_name: AuthUserFirstName, full_name: AuthUserName, profile_picture: AuthUserImage }
+            // check if user already exists in database
 
-
-            try { // check if user already exists in database
+            try {
                 pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
-                    console.log('Query if user exists result: ', result)
                     if (error) throw error;
                     console.log('Query if user exists error type:', error);
+                    console.log('query if user exists result: ', result)
 
                     if (result.length === 0) {
-                        console.log('Inserting new user to auth db')
+                        console.log('inserting new user to auth db')
                         // TABLE: AUTH_DATA
                         pool.query('INSERT INTO auth_data SET ?', AuthUserData, (error, result) => {
                             if (error) throw error;
@@ -88,10 +83,9 @@ const router = app => {
 
                     } else {
                         console.log('Existing user')
-                        // response.send("Existing user- signing in");
+                        response.send("Existing user- signing in");
                     }
                 });
-
             } catch (err) {
                 console.log('backend fail: ' + err)
             }
