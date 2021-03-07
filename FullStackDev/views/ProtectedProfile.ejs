@@ -1,4 +1,3 @@
-<!DOCTYPE>
 <html>
 
 <head>
@@ -11,13 +10,16 @@
     <p>
         It requires the user to be signed in to see
     </p>
-    <div class="alert alert-danger"><%= message %></div>
+    <!-- <div class="alert alert-danger"><%= data.name %></div> -->
+    <div class="alert alert-danger"><%= data.name %></div>
+    <div class="alert alert-danger"><%= data.user_id %></div>
+    <img src="<%= data.profile_picture  %>" />
+
 
     <input type="button" onClick="location.href='http://localhost:80/home';" value="Go to home">
 </body>
 
 <script>
-    console.log('user id: ', googleUserID)
     // GET COOKIE FUNCTION
     function getCookieValue(cname) {
         var name = cname + "=";
@@ -34,19 +36,6 @@
         }
         return "";
     }
-
-    /*
-    var BaseProtectedUrl = `http://localhost/UserData`
-
-    var ProtectedUrl = requestString + `?userName=${userName}`
-    console.log('The podcast url is:', urlParameters)
-
-    $.get(urlParameters, function (data, status) {
-    $.get(getUrl, {})
-        .done(function (data) {
-            console.log('Test server response :', data)
-        });
-        */
 </script>
 
 </html>

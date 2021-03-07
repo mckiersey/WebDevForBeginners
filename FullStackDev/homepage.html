@@ -57,7 +57,7 @@
     }
     //Auth status
     var cookieToken = getCookieValue('USER_SESSION_TOKEN')
-    console.log('cookie token value:', cookieToken)
+    console.log('Auth status: cookie token value:', cookieToken)
     if (cookieToken == "") {
         document.getElementById('AuthStatus').innerHTML = "<span style='color: red;'>Not Signed in</span>";
     } else {
@@ -83,7 +83,6 @@
             console.log('failed to post to backend')
             response.send('Error: ' + err)
         }
-
     }
 
     // A protected route function
@@ -94,35 +93,32 @@
             $.post('http://localhost:80/ProtectedRoute', {
                 token: CookieToken
             }).done(function (data) {
-                console.log('Server response :', data)
                 console.log('verification result:', data[0])
                 if (data[0] == '* Token verification SUCCESS: User logged in *') {
                     alert('Verification success')
-                    googleUserID = data[1]
+                    GoogleTokenId = data[1]
+                    console.log('checking value of Google User ID: ', GoogleTokenId)
 
                     // Redirect to protected profile
-                    var BaseProtectedUrl = `http://localhost/ProtectedProfile`
-                    var ProtectedUrl = BaseProtectedUrl + `?userId=${googleUserID}`
-                    console.log('The protected url is:', ProtectedUrl)
+                    var BaseProtectedUrl = 'http://localhost/ProtectedProfile'
+                    var ProtectedUrl = BaseProtectedUrl + `?GoogleTokenId=${GoogleTokenId}`
+                    console.log('The protected url is:', BaseProtectedUrl)
                     window.location.href = ProtectedUrl
+                    /*
                     $.get(ProtectedUrl, function (data, status) {
-                        console.log('Test server response :', data)
+                        console.log('Status of protected profile request: ', status)
                     });
-
-
+                    */
                 } else {
                     console.log('Server response :', data)
                     alert('Please sign in')
                     window.location.href = 'http://localhost:80/Home'
-
                 };
-
             });
         } catch (err) {
             console.log('failed to post to backend')
             response.send('Error: ' + err)
             window.location.href = 'http://localhost:80/home'
-
         }
     }
 

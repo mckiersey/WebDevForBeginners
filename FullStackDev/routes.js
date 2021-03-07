@@ -64,21 +64,20 @@ const router = app => {
 
             try {
                 pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
-                    if (error) throw error;
-                    console.log('Query if user exists error type:', error);
+                    if (error) throw console.log('Query if user exists error type:', error);
                     console.log('query if user exists result: ', result)
 
                     if (result.length === 0) {
                         console.log('inserting new user to auth db')
                         // TABLE: AUTH_DATA
                         pool.query('INSERT INTO auth_data SET ?', AuthUserData, (error, result) => {
-                            if (error) throw error;
-                            console.log('Authentication DB error: ', error);
+                            if (error) throw console.log('Authentication DB error: ', error);
+
                         });
                         //TABLE: USER_PROFILE
                         pool.query('INSERT INTO user_profile SET?', AuthUserProfile, (error, result) => {
-                            if (error) throw error;
-                            console.log('User profile DB error: ', error)
+                            if (error) throw console.log('User profile DB error: ', error);
+
                         });
 
                     } else {
@@ -104,13 +103,38 @@ const router = app => {
             var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", VerifiedTokenPayload[0]]
             response.send(SuccessResponseArray)
         }
+        console.log('PROTECT ROUTE END')
     });
 
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
-        console.log('protected profile reponse: ', request.query)
-        data = request.query.userId
-        console.log('google user id sent from front end= ', data)
+        console.log("PROTECTED PROFILE START")
+        GoogleTokenId = request.query.GoogleTokenId
+        console.log("google token id:", GoogleTokenId)
+        // FIND APP USER ID
+        pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", GoogleTokenId, (error, result) => {
+            if (error) throw console.log('Find user ID error: ', error);
+            user_id = result[0].user_id
+            console.log('partagr user id = ', user_id)
+
+            // RETRIEVE APP USER DATA
+            pool.query("SELECT * FROM USER_PROFILE WHERE user_id = ?", user_id, (error, result) => {
+                if (error) throw console.log('retieval error:', error);
+                user_data = result[0]
+                //console.log('user data: ', user_data)
+
+                response.render("ProtectedProfile.ejs", {
+                    data: {
+                        name: user_data.first_name, user_id: user_data.user_id,
+                        profile_picture: user_data.profile_picture
+                    }
+                });
+
+            }); // RETRIEVE APP USER DATA: END
+
+        }); // FIND APP USER ID: END
+
+
 
     })
 
@@ -158,7 +182,7 @@ const router = app => {
             //response.redirect('/SignOut') //to delete cookie
             pool.query(`SELECT * FROM auth_data`, (error, result) => {
                 if (error) throw error;
-                response.send('Remaining users: ', result);
+                response.send(result);
             });
         });
     });
