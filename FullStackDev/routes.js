@@ -51,8 +51,6 @@ const router = app => {
             response.send('* Token verification FAIL: User not logged in *')
 
         } else {
-            console.log('Sign in route: Verified token clause')
-            console.log('verified token to be set as cookie: ', token)
             response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
             var AuthUserId = VerifiedTokenPayload[0]
             var AuthUserName = VerifiedTokenPayload[1]
@@ -111,7 +109,6 @@ const router = app => {
 
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
-        console.log("PROTECTED PROFILE START")
         GoogleTokenId = request.query.GoogleTokenId
         console.log("google token id:", GoogleTokenId)
         // FIND APP USER ID
@@ -160,8 +157,8 @@ const router = app => {
     app.get('/SignOut', (req, res) => {
         console.log('sign out route')
         res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
+        console.log('Cookie cleared: logged out page redirection')
         res.redirect('/LoggedOutPage')
-
     })
 
     app.get('/LoggedOutPage', (req, res) => {
@@ -170,22 +167,20 @@ const router = app => {
     })
 
     // ROTUE TO DELETE A USER
-    // example: http://localhost/deleteuser?email=seanmckiernan01@gmail.com
-    // example: http://localhost/deleteuser?email=smckiernan91@gmail.com
     app.get('/deleteuser', (request, response) => {
-        console.log(request.qurey)
         var UserToDelete = request.query.email
         console.log('request to delete this data:', UserToDelete);
         pool.query(`DELETE FROM auth_data WHERE email = '${UserToDelete}'`, (error, result) => {
             if (error) throw error;
-            console.log('Delete response: ', response.result);
+            console.log('Delete response: ', result);
 
-            //response.redirect('/SignOut') //to delete cookie
             pool.query(`SELECT * FROM auth_data`, (error, result) => {
-                if (error) throw error;
-                response.send(result);
+                if (error) throw console.log('remiaing users error: ', error);
+                //response.send(result);
             });
         });
+        console.log('sign out redirection')
+        response.redirect('/SignOut') //to delete cookie
     });
 
     // DELETE ME
