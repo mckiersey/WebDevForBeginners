@@ -101,38 +101,36 @@ const router = app => {
         if (!VerifiedTokenPayload) { //if value == false
             response.send('* Token verification FAIL: User not logged in *')
         } else {
-            var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", VerifiedTokenPayload[0]]
-            response.send(SuccessResponseArray)
+            // FIND APP USER ID
+            console.log('verified token (google user id): ', VerifiedTokenPayload[0])
+            pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", VerifiedTokenPayload[0], (error, result) => {
+                if (error) throw console.log('Find user ID error: ', error);
+                user_id = result[0].user_id
+                var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id]
+                response.send(SuccessResponseArray)
+            }); // FIND APP USER ID: END
+
         }
-        console.log('PROTECT ROUTE END')
     });
 
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
-        GoogleTokenId = request.query.GoogleTokenId
-        console.log("google token id:", GoogleTokenId)
-        // FIND APP USER ID
-        pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", GoogleTokenId, (error, result) => {
-            if (error) throw console.log('Find user ID error: ', error);
-            user_id = result[0].user_id
-            console.log('partagr user id = ', user_id)
+        user_id = request.query.user_id
+        // RETRIEVE APP USER DATA
+        pool.query("SELECT * FROM USER_PROFILE WHERE user_id = ?", user_id, (error, result) => {
+            if (error) throw console.log('retieval error:', error);
+            user_data = result[0]
 
-            // RETRIEVE APP USER DATA
-            pool.query("SELECT * FROM USER_PROFILE WHERE user_id = ?", user_id, (error, result) => {
-                if (error) throw console.log('retieval error:', error);
-                user_data = result[0]
-                //console.log('user data: ', user_data)
+            response.render("ProtectedProfile.ejs", {
+                data: {
+                    name: user_data.first_name, user_id: user_data.user_id,
+                    profile_picture: user_data.profile_picture
+                }
+            });
 
-                response.render("ProtectedProfile.ejs", {
-                    data: {
-                        name: user_data.first_name, user_id: user_data.user_id,
-                        profile_picture: user_data.profile_picture
-                    }
-                });
+        }); // RETRIEVE APP USER DATA: END
 
-            }); // RETRIEVE APP USER DATA: END
 
-        }); // FIND APP USER ID: END
 
     })
 
@@ -146,7 +144,6 @@ const router = app => {
     // Just type http://localhost/users to trigger this and it'll show the list of users signed up.
     app.get('/users', (request, response) => {
         pool.query(`SELECT * FROM auth_data`, (error, result) => {
-            console.log('in all users route...')
             if (error) throw error;
             response.send(result);
         });
@@ -176,7 +173,6 @@ const router = app => {
 
             pool.query(`SELECT * FROM auth_data`, (error, result) => {
                 if (error) throw console.log('remiaing users error: ', error);
-                //response.send(result);
             });
         });
         console.log('sign out redirection')

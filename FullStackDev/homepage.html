@@ -94,14 +94,15 @@
                 token: CookieToken
             }).done(function (data) {
                 console.log('verification result:', data[0])
+                console.log('verification result (user id):', data[1])
+
                 if (data[0] == '* Token verification SUCCESS: User logged in *') {
                     alert('Verification success')
-                    GoogleTokenId = data[1]
-                    console.log('checking value of Google User ID: ', GoogleTokenId)
+                    user_id = data[1]
 
                     // Redirect to protected profile
                     var BaseProtectedUrl = 'http://localhost/ProtectedProfile'
-                    var ProtectedUrl = BaseProtectedUrl + `?GoogleTokenId=${GoogleTokenId}`
+                    var ProtectedUrl = BaseProtectedUrl + `?user_id=${user_id}`
                     console.log('The protected url is:', BaseProtectedUrl)
                     window.location.href = ProtectedUrl
 
