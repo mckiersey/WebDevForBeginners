@@ -104,11 +104,7 @@
                     var ProtectedUrl = BaseProtectedUrl + `?GoogleTokenId=${GoogleTokenId}`
                     console.log('The protected url is:', BaseProtectedUrl)
                     window.location.href = ProtectedUrl
-                    /*
-                    $.get(ProtectedUrl, function (data, status) {
-                        console.log('Status of protected profile request: ', status)
-                    });
-                    */
+
                 } else {
                     console.log('Server response :', data)
                     alert('Please sign in')

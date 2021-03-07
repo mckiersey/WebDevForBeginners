@@ -20,7 +20,7 @@ async function verify(CLIENT_ID, token) {
             idToken: token,
             audience: CLIENT_ID
         });
-        console.log('User Verified')
+        console.log('Token Verified')
 
         const payload = ticket.getPayload(); // The verified token gives back a ticket. This ticket contains things like user ID, email and profile picture (all from a user's Google Account)
         const AuthUserId = payload.sub;
@@ -42,7 +42,7 @@ async function verify(CLIENT_ID, token) {
 const router = app => {
 
 
-    // POST NEW USER TO DATABASE
+    // VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY
     app.post('/SignIn', async (request, response) => {
         let token = request.body.token
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
@@ -51,6 +51,8 @@ const router = app => {
             response.send('* Token verification FAIL: User not logged in *')
 
         } else {
+            console.log('Sign in route: Verified token clause')
+            console.log('verified token to be set as cookie: ', token)
             response.cookie('USER_SESSION_TOKEN', token) // passing a verified token to the browser
             var AuthUserId = VerifiedTokenPayload[0]
             var AuthUserName = VerifiedTokenPayload[1]
@@ -65,10 +67,10 @@ const router = app => {
             try {
                 pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
                     if (error) throw console.log('Query if user exists error type:', error);
-                    console.log('query if user exists result: ', result)
+                    console.log('Query if user exists result: ', result)
 
                     if (result.length === 0) {
-                        console.log('inserting new user to auth db')
+                        console.log('No result from existing user query: Inserting new user into Auth DB')
                         // TABLE: AUTH_DATA
                         pool.query('INSERT INTO auth_data SET ?', AuthUserData, (error, result) => {
                             if (error) throw console.log('Authentication DB error: ', error);
@@ -79,6 +81,8 @@ const router = app => {
                             if (error) throw console.log('User profile DB error: ', error);
 
                         });
+                        console.log('New user added')
+                        response.send("New user added");
 
                     } else {
                         console.log('Existing user')
@@ -96,7 +100,6 @@ const router = app => {
         token = request.body.token
 
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
-        console.log('value of verify function: ', VerifiedTokenPayload)
         if (!VerifiedTokenPayload) { //if value == false
             response.send('* Token verification FAIL: User not logged in *')
         } else {
@@ -133,8 +136,6 @@ const router = app => {
             }); // RETRIEVE APP USER DATA: END
 
         }); // FIND APP USER ID: END
-
-
 
     })
 
