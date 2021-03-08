@@ -97,19 +97,19 @@
                 console.log('verification result (user id):', data[1])
 
                 if (data[0] == '* Token verification SUCCESS: User logged in *') {
-                    //alert('Verification success')
+                    alert('Verification success')
                     user_id = data[1]
 
                     // Redirect to protected profile
                     var BaseProtectedUrl = 'http://localhost/ProtectedProfile'
                     var ProtectedUrl = BaseProtectedUrl + `?user_id=${user_id}`
                     console.log('The protected url is:', BaseProtectedUrl)
-                    //window.location.href = ProtectedUrl
+                    window.location.href = ProtectedUrl
 
                 } else {
                     console.log('Server response :', data)
-                    //alert('Please sign in')
-                    //window.location.href = 'http://localhost:80/Home'
+                    alert('Please sign in')
+                    window.location.href = 'http://localhost:80/Home'
                 };
             });
         } catch (err) {

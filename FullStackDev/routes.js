@@ -106,24 +106,12 @@ const router = app => {
                 console.log('result from auth data query: ', result[0])
                 user_id = result[0].user_id
                 var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id] // send to Frontend
-                // REDIRECT
-                response.redirect(307, '/ProtectedProfile?user_id=' + user_id);
-                // response.send(SuccessResponseArray)
-
-
+                response.send(SuccessResponseArray)
             }); // FIND APP USER ID: END
-
-
         } // END OF IF/ELSE CLAUSE VERIFICATION CLAUSE
     }); // END OF POST: PROTECTED ROUTE
-    //
 
-    app.get('/RedirectTest', (request, response) => {
-        console.log('redirect test')
-        console.log('redirect test:', request.query)
-        user_id = request.query.user_id
-        response.redirect(303, '/ProtectedProfile?user_id=' + user_id);
-    });
+
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
         console.log('Protected Profile route')
