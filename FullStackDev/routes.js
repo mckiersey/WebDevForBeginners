@@ -103,20 +103,34 @@ const router = app => {
             console.log('verified token (google user id): ', VerifiedTokenPayload[0])
             pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", VerifiedTokenPayload[0], (error, result) => { // value of app user id on row of google user id 
                 if (error) throw console.log('Find user ID error: ', error);
+                console.log('result from auth data query: ', result[0])
                 user_id = result[0].user_id
                 var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id] // send to Frontend
-                //response.send(SuccessResponseArray)
-
                 // REDIRECT
-                response.redirect
+                response.redirect(307, '/ProtectedProfile?user_id=' + user_id);
+                // response.send(SuccessResponseArray)
+
+
             }); // FIND APP USER ID: END
+
+
         } // END OF IF/ELSE CLAUSE VERIFICATION CLAUSE
     }); // END OF POST: PROTECTED ROUTE
+    //
 
-
+    app.get('/RedirectTest', (request, response) => {
+        console.log('redirect test')
+        console.log('redirect test:', request.query)
+        user_id = request.query.user_id
+        response.redirect(303, '/ProtectedProfile?user_id=' + user_id);
+    });
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
+        console.log('Protected Profile route')
+
         user_id = request.query.user_id
+        console.log('redirected protected profile:', request.query)
+
         // RETRIEVE APP USER DATA
         pool.query("SELECT * FROM USER_PROFILE WHERE user_id = ?", user_id, (error, result) => {
             if (error) throw console.log('retieval error:', error);
@@ -147,7 +161,7 @@ const router = app => {
 
     });
 
-    // Simple sign out route 
+    // Simple sign out route
     app.get('/SignOut', (req, res) => {
         console.log('sign out route')
         res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
