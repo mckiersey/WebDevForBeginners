@@ -105,10 +105,14 @@ const router = app => {
                 if (error) throw console.log('Find user ID error: ', error);
                 user_id = result[0].user_id
                 var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id] // send to Frontend
-                response.send(SuccessResponseArray)
+                //response.send(SuccessResponseArray)
+
+                // REDIRECT
+                response.redirect
             }); // FIND APP USER ID: END
-        }
+        } // END OF IF/ELSE CLAUSE VERIFICATION CLAUSE
     }); // END OF POST: PROTECTED ROUTE
+
 
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
