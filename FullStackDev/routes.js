@@ -42,7 +42,7 @@ async function verify(CLIENT_ID, token) {
 const router = app => {
 
 
-    // VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY
+    // VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY: SET COOKIE VALUE IN BROWSER
     app.post('/SignIn', async (request, response) => {
         let token = request.body.token
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
@@ -79,16 +79,14 @@ const router = app => {
                             if (error) throw console.log('User profile DB error: ', error);
 
                         });
-                        console.log('New user added')
                         response.send("New user added");
 
                     } else {
-                        console.log('Existing user')
                         response.send("Existing user- signing in");
                     }
                 });
             } catch (err) {
-                console.log('backend fail: ' + err)
+                console.log('Sign up route fail: ' + err)
             }
         }
     });
@@ -101,17 +99,16 @@ const router = app => {
         if (!VerifiedTokenPayload) { //if value == false
             response.send('* Token verification FAIL: User not logged in *')
         } else {
-            // FIND APP USER ID
+            // FIND APP USER ID (use internal app ID rather than google id to identify a user)
             console.log('verified token (google user id): ', VerifiedTokenPayload[0])
-            pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", VerifiedTokenPayload[0], (error, result) => {
+            pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", VerifiedTokenPayload[0], (error, result) => { // value of app user id on row of google user id 
                 if (error) throw console.log('Find user ID error: ', error);
                 user_id = result[0].user_id
-                var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id]
+                var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id] // send to Frontend
                 response.send(SuccessResponseArray)
             }); // FIND APP USER ID: END
-
         }
-    });
+    }); // END OF POST: PROTECTED ROUTE
 
     // Please refer to the schematic to understand how /ProtectedRoute is related to /ProtectedProfile
     app.get('/ProtectedProfile', (request, response) => {
@@ -126,13 +123,9 @@ const router = app => {
                     name: user_data.first_name, user_id: user_data.user_id,
                     profile_picture: user_data.profile_picture
                 }
-            });
-
+            }); // END OF RESPONSE.RENDER PROTECTED PROFILE
         }); // RETRIEVE APP USER DATA: END
-
-
-
-    })
+    }) // END OF GET: PROTECTED PROFILE
 
 
     app.get('/home', (request, response) => {
