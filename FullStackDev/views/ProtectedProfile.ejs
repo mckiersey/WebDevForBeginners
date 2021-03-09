@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <!-- ADD BOOTSTRAP-->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <!-- See here: https://getbootstrap.com/docs/4.2/getting-started/introduction/  -->
@@ -24,6 +25,11 @@
     <input type="button" class="btn btn-light ProfilePicture" id='HomeButton'
         onClick="location.href='http://localhost:80/home';" value="Go to home">
 
+
+    <footer>
+        <p>Image: Late afternoon in Paris | Taken by <a href="https://mckiersey.medium.com/" target="_blank">Seán
+                McKiernan</a></p>
+    </footer>
     <style>
         p,
         h2,
@@ -41,6 +47,10 @@
 
         body {
             background-image: url('https://miro.medium.com/max/1620/1*FdGgTAPo4BmTL1qK5A-d5Q.jpeg');
+            background-repeat: no-repeat;
+            background-size: cover;
+
+
         }
 
         .ProfilePicture {
@@ -58,7 +68,19 @@
             border: 0px solid #ddd;
 
         }
-    </style>
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        a {
+            color: white;
+        }
     </style>
 </body>
 
