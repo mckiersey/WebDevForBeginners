@@ -1,22 +1,65 @@
 <html>
 
 <head>
-    <h1> This is a protected profile page.</h1>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <!-- See here: https://getbootstrap.com/docs/4.2/getting-started/introduction/  -->
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
 </head>
 
 <body>
-    <p>
-        It requires the user to be signed in to see
-    </p>
-    <!-- <div class="alert alert-danger"><%= data.name %></div> -->
-    <div class="alert alert-danger"><%= data.name %></div>
-    <div class="alert alert-danger"><%= data.user_id %></div>
-    <img src="<%= data.profile_picture  %>" />
+    <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1">
+            Welcome <b class="Dynamic"><%= data.name %></b></span> </nav>
+    <h4>
+        Private profile page: Only available to signed-in users
+    </h4>
 
+    <h2>App user ID: <b class="Dynamic"><%= data.user_id %></b>
+    </h2>
+    <img class="ProfilePicture" src="<%=data.profile_picture%>" />
 
-    <input type="button" onClick="location.href='http://localhost:80/home';" value="Go to home">
+    <input type="button" class="btn btn-light ProfilePicture" id='HomeButton'
+        onClick="location.href='http://localhost:80/home';" value="Go to home">
+
+    <style>
+        p,
+        h2,
+        h4 {
+            margin: 20px;
+        }
+
+        .navbar-brand {
+            font-size: 50px;
+        }
+
+        .Dynamic {
+            color: 0077b6;
+        }
+
+        body {
+            background-image: url('https://miro.medium.com/max/1620/1*FdGgTAPo4BmTL1qK5A-d5Q.jpeg');
+        }
+
+        .ProfilePicture {
+            position: right;
+            border-radius: 8px;
+            border: 5px solid #ddd;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 10%;
+        }
+
+        #HomeButton {
+            margin-top: 80px;
+            border: 0px solid #ddd;
+
+        }
+    </style>
+    </style>
 </body>
 
 <script>
