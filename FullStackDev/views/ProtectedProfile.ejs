@@ -13,17 +13,42 @@
 <body>
     <nav class="navbar navbar-light bg-light">
         <span class="navbar-brand mb-0 h1">
-            Welcome <b class="Dynamic"><%= data.name %></b></span> </nav>
-    <h4>
-        Private profile page: Only available to signed-in users
-    </h4>
+            Welcome <b class="Dynamic"><%= data.name %></b></span>
+        <h4>
+            Private profile page: Only available to signed-in users
+        </h4>
+    </nav>
 
-    <h2>App user ID: <b class="Dynamic"><%= data.user_id %></b>
+
+    <div id="ProfilePictureSection">
+        <img id="ProfilePicture" src="<%=data.profile_picture%>" />
+        <button class="btn btn-light ProfilePicture" id="HomeButton" onClick=location.href='http://localhost:80/home'>Go
+            to home</button>
+    </div>
+
+
+    <h2>user ID: <b class=" Dynamic"><%= data.user_id %></b>
     </h2>
-    <img class="ProfilePicture" src="<%=data.profile_picture%>" />
 
-    <input type="button" class="btn btn-light ProfilePicture" id='HomeButton'
-        onClick="location.href='http://localhost:80/home';" value="Go to home">
+
+
+
+    <div id="YouTubeForm">
+        <label>Youtube Link</label>
+        <input type="text" name="YouTubeLink" placeholder="YouTube embed link">
+        </br>
+        <div>
+            <button id="VideoButton" onclick="NewVideo()">Submit</button>
+            See <a href=" https://www.youtube.com/watch?v=kiyi-C7NQrQ" target="_blank">embed link</a>
+        </div>
+    </div>
+
+
+    <div id=VideoSection></div>
+
+
+
+
 
 
     <footer>
@@ -31,10 +56,14 @@
                 McKiernan</a></p>
     </footer>
     <style>
+        input[readonly] {
+            background-color: lightgray;
+        }
+
         p,
         h2,
         h4 {
-            margin: 20px;
+            margin: 10px;
         }
 
         .navbar-brand {
@@ -53,8 +82,16 @@
 
         }
 
-        .ProfilePicture {
-            position: right;
+
+        #ProfilePictureSection {
+            position: relative;
+        }
+
+        #ProfilePicture {
+            position: absolute;
+            top: 0px;
+            right: 60px;
+            margin: 10px;
             border-radius: 8px;
             border: 5px solid #ddd;
             display: block;
@@ -66,6 +103,15 @@
         #HomeButton {
             margin-top: 80px;
             border: 0px solid #ddd;
+            position: absolute;
+            top: 140px;
+            right: 90px;
+
+        }
+
+        #YouTubeForm {
+            margin-top: 220px;
+            margin-left: 50px;
 
         }
 
@@ -80,6 +126,10 @@
 
         a {
             color: white;
+        }
+
+        #VideoSection {
+            margin: 15px;
         }
     </style>
 </body>
@@ -101,6 +151,33 @@
         }
         return "";
     }
+
+    function NewVideo() {
+        user_id = getCookieValue("APP_USER_ID")
+        link = document.getElementsByTagName("input")[0].value;
+        console.log('User id cookie retrieved: ', user_id, 'with video: ', link)
+        try {
+            $.post('http://localhost:80/NewVideo', {
+                UserId: user_id,
+                VideoLink: link
+            }).done(function (data) {
+                console.log('Server response :', data)
+            });
+        } catch (err) {
+            console.log('failed to post to backend')
+            response.send('Error: ' + err)
+        }
+    }
+
+    // GET VIDEO
+    user_id = getCookieValue("APP_USER_ID")
+    var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
+    console.log(GetVideoUrl)
+    $.get(GetVideoUrl, function (data, status) {
+        document.getElementById('VideoSection').innerHTML += `${data}`
+    });
 </script>
+
+
 
 </html>

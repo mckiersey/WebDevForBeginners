@@ -18,10 +18,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-// view engine
-//app.set('views', '/Users/Seansmac/Desktop/Dev/Full_stack_for_absolute_beginners/myrepo/FullStackDev/views');
-
-
 // Add body parser for routes.js file
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({

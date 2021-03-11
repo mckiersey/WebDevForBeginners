@@ -12,18 +12,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <!-- See here: https://getbootstrap.com/docs/4.2/getting-started/introduction/  -->
-
-
 </head>
 
 <body>
 
     <div id="SessionStatus">
         <h2 id='SessionStatusText'></h2>
-
         <input type="button" class="btn btn-light" id='SignOutButton' onClick=signOut(); value="Sign Out">
-
     </div>
+
     <h1>Web Dev: From Front to back</h1>
     <p>Connecting a dynamic front end to NodeJS/Express sever</p>
 
@@ -120,7 +117,6 @@
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
-            /* optional, center the image */
         }
 
         footer {
@@ -163,11 +159,7 @@
         } else {
             document.getElementById('SessionStatusText').innerHTML =
                 "<span style='color: RGB(170, 204, 0);'>Signed In</span>";
-
-
         }
-
-
 
         //SIGN IN/ SIGN UP: SET COOKIE VALUE IN BROWSER
         function onSignIn(googleUser) {
@@ -194,16 +186,14 @@
                 $.post('http://localhost:80/ProtectedRoute', {
                     token: CookieToken
                 }).done(function (data) {
-                    console.log('verification result:', data[0])
-                    console.log('verification result (user id):', data[1])
 
                     if (data[0] == '* Token verification SUCCESS: User logged in *') {
                         alert('Verification success')
-                        user_id = data[1]
+                        user_id = data[1] // could have equivalently taken from the token in the browser
 
-                        // Redirect to protected profile
-                        var BaseProtectedUrl = 'http://localhost/ProtectedProfile'
-                        var ProtectedUrl = BaseProtectedUrl + `?user_id=${user_id}`
+                        // REDIRECT FROM PROTECTED ROUTE TO PROTECTED PROFILE (Bounce from BE to FE and back to BE => Redundent if redirection can be done directly in BE)
+                        var BaseProtectedUrl = 'http://localhost/ProtectedProfile?user_id='
+                        var ProtectedUrl = BaseProtectedUrl + user_id
                         console.log('The protected url is:', BaseProtectedUrl)
                         window.location.href = ProtectedUrl
 
