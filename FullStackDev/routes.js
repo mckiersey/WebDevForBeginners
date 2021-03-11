@@ -127,7 +127,8 @@ const router = app => {
 
     // POST NEW VIDEO
     app.post("/NewVideo", (request, response) => {
-        user_id = request.body.UserId
+        token = request.body.token
+
         VideoLink = request.body.VideoLink
         InsertData = { user_id: user_id, content: VideoLink }
         // ADD VIDEO LINK TO DATA BASE

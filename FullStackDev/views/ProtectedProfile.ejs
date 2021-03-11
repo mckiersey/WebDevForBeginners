@@ -153,12 +153,14 @@
     }
 
     function NewVideo() {
-        user_id = getCookieValue("APP_USER_ID")
+
+        // get google token and verify it is valid for this user
+
         link = document.getElementsByTagName("input")[0].value;
         console.log('User id cookie retrieved: ', user_id, 'with video: ', link)
         try {
             $.post('http://localhost:80/NewVideo', {
-                UserId: user_id,
+                token: token,
                 VideoLink: link
             }).done(function (data) {
                 console.log('Server response :', data)
@@ -170,7 +172,9 @@
     }
 
     // GET VIDEO
-    user_id = getCookieValue("APP_USER_ID")
+    console.log(window.location.href)
+    const urlParams = new URLSearchParams(window.location.search);
+    var user_id = urlParams.get('user_id');
     var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
     console.log(GetVideoUrl)
     $.get(GetVideoUrl, function (data, status) {
