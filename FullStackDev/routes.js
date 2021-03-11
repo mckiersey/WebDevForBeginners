@@ -126,24 +126,59 @@ const router = app => {
 
 
     // POST NEW VIDEO
-    app.post("/NewVideo", (request, response) => {
-        token = request.body.token
+    app.post("/NewVideo", async (request, response) => {
 
+        console.log('new video route')
+        token = request.body.token
+        FrontEndUserId = request.body.ProfileId
         VideoLink = request.body.VideoLink
-        InsertData = { user_id: user_id, content: VideoLink }
-        // ADD VIDEO LINK TO DATA BASE
-        pool.query('INSERT INTO user_content SET ?', InsertData, (error, result) => {
-            if (error) throw console.log('User profile DB error: ', error);
-        });
-        response.redirect('/ProtectedProfile?user_id=' + user_id) // REDIRECTION DOES NOT WORK -> NOT POSSIBLE TO RENDER FROM A POST ROUTE? The desired behaviour is that the page refreshes and reloads /ProtectedProfile automatically after submission
+
+        VerifiedTokenPayload = await verify(CLIENT_ID, token)
+        var FrontEndAuthUserId = VerifiedTokenPayload[0] //Google user ID
+
+        if (!VerifiedTokenPayload) { //if value == false
+            response.send('* Token verification FAIL: User not logged in *')
+
+        } else { //Token has been verified
+
+            // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
+            try {
+
+                pool.query("SELECT auth_user_id FROM AUTH_DATA WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id 
+                    console.log('Security check FE userId: ', FrontEndUserId)
+                    console.log('security check:', result)
+                    console.log('Security check Backend End Google ID: ', result[0].auth_user_id)
+                    StoredGoogleAuthID = result[0].auth_user_id
+
+                    if (FrontEndAuthUserId == StoredGoogleAuthID) {
+                        console.log('Authorised user editing correct profile')
+                        InsertData = { user_id: FrontEndUserId, content: VideoLink }
+                        // ADD VIDEO LINK TO DATA BASE
+                        pool.query('INSERT INTO user_content SET ?', InsertData, (error, result) => {
+                            if (error) throw console.log('User profile DB error: ', error);
+                        });
+                        response.send('New Video Saved')
+                    } else {
+                        console.log('User not on correct profile')
+                    }
+                });
+            } catch (error) {
+                console.log('Error from check that token matches profile')
+            }
+        }
+
+
+
     })
 
     // GET VIDEO
     app.get("/Video", (request, response) => {
         user_id = request.query.user_id
+        console.log(user_id)
         // RETRIEVE USER CONTENT DATA
         pool.query("SELECT content FROM user_content WHERE user_id = ? ORDER BY row_num DESC LIMIT 1 ", user_id, (error, result) => { // ORDER BY/DESC => Last input value
             if (error) console.log('Content retrieval error:');
+            console.log(result)
             try {
                 user_content = result[0]
                 if (result.length === 0) {

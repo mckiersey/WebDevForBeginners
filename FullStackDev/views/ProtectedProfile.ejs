@@ -135,6 +135,10 @@
 </body>
 
 <script>
+    //GET PAGE USER ID
+    var urlParams = new URLSearchParams(window.location.search);
+    var user_id = urlParams.get('user_id');
+
     // GET COOKIE FUNCTION
     function getCookieValue(cname) {
         var name = cname + "=";
@@ -153,30 +157,35 @@
     }
 
     function NewVideo() {
-
-        // get google token and verify it is valid for this user
-
+        var CookieToken = getCookieValue('USER_SESSION_TOKEN')
         link = document.getElementsByTagName("input")[0].value;
         console.log('User id cookie retrieved: ', user_id, 'with video: ', link)
-        try {
+        try { // CLOSE THIS CLAUSE
             $.post('http://localhost:80/NewVideo', {
-                token: token,
+                token: CookieToken,
+                ProfileId: user_id,
                 VideoLink: link
+
             }).done(function (data) {
                 console.log('Server response :', data)
+                if (data == 'New Video Saved') {
+                    window.location.href = window.location
+                        .href // refresh page after successfully saving a new video
+                } else {
+                    alert('Video not saved, please try again', data)
+                }
             });
         } catch (err) {
             console.log('failed to post to backend')
             response.send('Error: ' + err)
+
         }
     }
 
+
+
     // GET VIDEO
-    console.log(window.location.href)
-    const urlParams = new URLSearchParams(window.location.search);
-    var user_id = urlParams.get('user_id');
     var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
-    console.log(GetVideoUrl)
     $.get(GetVideoUrl, function (data, status) {
         document.getElementById('VideoSection').innerHTML += `${data}`
     });
