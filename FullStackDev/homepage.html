@@ -33,7 +33,7 @@
 
     <div class="Profile">
         <input type="button" class="btn btn-light" id='ProfileButton' onClick=ProfileRoute(); value="My Profile">
-        <h2 id="ProfileText">Private profile, which requires sign in</h2>
+        <h2 id="ProfileText">Sign in to see a profile</h2>
     </div>
 
     <footer>
@@ -193,8 +193,8 @@
 
                         // REDIRECT FROM PROFILE ROUTE TO PROFILE PAGE (Bounce from BE to FE and back to BE => Redundent if redirection can be done directly in BE)
                         var BaseProfiledUrl = 'http://localhost/ProfilePage?user_id='
-                        var ProofileUrl = BaseProfiledUrl + user_id
-                        window.location.href = ProtectedUrl
+                        var ProfileUrl = BaseProfiledUrl + user_id
+                        window.location.href = ProfileUrl
 
                     } else {
                         console.log('Server response :', data)
