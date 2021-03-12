@@ -20,7 +20,6 @@ async function verify(CLIENT_ID, token) {
             idToken: token,
             audience: CLIENT_ID
         });
-        console.log('Token Verified')
 
         const payload = ticket.getPayload(); // The verified token gives back a ticket. This ticket contains things like user ID, email and profile picture (all from a user's Google Account)
         const AuthUserId = payload.sub;
@@ -30,7 +29,6 @@ async function verify(CLIENT_ID, token) {
         return [AuthUserId, UserName, UserEmail, UserPicture]
 
     } catch (error) {
-        console.log('Token not verified')
         return false
     }
 
@@ -66,7 +64,7 @@ const router = app => {
             }
 
             try { // CHECK IF USER ALREADY EXISTS IN DATABASE
-                pool.query("SELECT google_user_id FROM user_profile WHERE google_user_id = ?", new_user_data, function (error, result, field) {
+                pool.query("SELECT * FROM user_profile WHERE google_user_id = ?", google_user_id, function (error, result) {
                     // User not in user_profile table => This is a New User
                     if (result.length === 0) {
                         console.log('No result from existing user query: Inserting new user into user_profile DB')
