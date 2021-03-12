@@ -191,10 +191,9 @@
                         alert('Verification success')
                         user_id = data[1] // could have equivalently taken from the token in the browser
 
-                        // REDIRECT FROM PROTECTED ROUTE TO PROTECTED PROFILE (Bounce from BE to FE and back to BE => Redundent if redirection can be done directly in BE)
-                        var BaseProtectedUrl = 'http://localhost/ProtectedProfile?user_id='
-                        var ProtectedUrl = BaseProtectedUrl + user_id
-                        console.log('The protected url is:', BaseProtectedUrl)
+                        // REDIRECT FROM PROFILE ROUTE TO PROFILE PAGE (Bounce from BE to FE and back to BE => Redundent if redirection can be done directly in BE)
+                        var BaseProfiledUrl = 'http://localhost/ProfilePage?user_id='
+                        var ProofileUrl = BaseProfiledUrl + user_id
                         window.location.href = ProtectedUrl
 
                     } else {
