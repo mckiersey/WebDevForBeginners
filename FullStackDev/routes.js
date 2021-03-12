@@ -52,32 +52,32 @@ const router = app => {
 
         } else { //Token has been verified
             response.cookie('USER_SESSION_TOKEN', token) // Setting a verified token in the browser
-            var AuthUserId = VerifiedTokenPayload[0]
-            var AuthUserName = VerifiedTokenPayload[1]
-            var AuthUserFirstName = AuthUserName.split(" ", 1)[0]
-            var AuthUserEmail = VerifiedTokenPayload[2]
-            var AuthUserImage = VerifiedTokenPayload[3]
+            var google_user_id = VerifiedTokenPayload[0]
+            var google_user_name = VerifiedTokenPayload[1]
+            var google_first_name = google_user_name.split(" ", 1)[0]
+            var google_email = VerifiedTokenPayload[2]
+            var google_profile_picture = VerifiedTokenPayload[3]
 
-            var AuthUserData = { auth_user_id: AuthUserId, email: AuthUserEmail }
-            var AuthUserProfile = { first_name: AuthUserFirstName, full_name: AuthUserName, profile_picture: AuthUserImage }
+            // Here the name before the colon corresponds to the field name in the table we created, the name after corresponds to the data, found in the verified token, above.
+            var new_user_data = {
+                google_user_id: google_user_id, first_name: google_first_name, full_name: google_user_name,
+                email: google_email, profile_picture: google_profile_picture
+            }
 
-            try { // check if user already exists in database
-                pool.query("SELECT auth_user_id FROM auth_data WHERE auth_user_id = ?", AuthUserId, function (error, result, field) {
-                    if (error) throw console.log('Query if user exists error type:', error);
-                    console.log('Query if user exists result: ', result)
-
-                    if (result.length === 0) { // User not in Auth data = New user
-                        console.log('No result from existing user query: Inserting new user into Auth DB')
-                        // INSERT NEW USER INTO: AUTH_DATA
-                        pool.query('INSERT INTO auth_data SET ?', AuthUserData, (error, result) => {
-                            if (error) throw console.log('Authentication DB error: ', error);
-                        });
-                        //INSERT NEW USER INTO: USER_PROFILE
-                        pool.query('INSERT INTO user_profile SET?', AuthUserProfile, (error, result) => {
-                            if (error) throw console.log('User profile DB error: ', error);
-                        });
+            try { // CHECK IF USER ALREADY EXISTS IN DATABASE
+                pool.query("SELECT google_user_id FROM user_profile WHERE google_user_id = ?", new_user_data, function (error, result, field) {
+                    // User not in user_profile table => This is a New User
+                    if (result.length === 0) {
+                        console.log('No result from existing user query: Inserting new user into user_profile DB')
+                        try {  //INSERT NEW USER INTO: USER_PROFILE
+                            pool.query('INSERT INTO user_profile SET?', google_user_data, (error, result) => {
+                            });
+                        } catch (error) {
+                            console.log('Unable to create new user, error: ', error)
+                        }
                         response.send("New user added");
-                    } else { // User in Auth data = Existing user
+                        // User exists in user_profile table => This is NOT a New User
+                    } else {
                         response.send("Existing user- signing in");
                     }
                 });
@@ -96,12 +96,12 @@ const router = app => {
             response.send('* Token verification FAIL: User not logged in *')
 
         } else { //Token has been verified
+            google_user_id = VerifiedTokenPayload[0]
             // FIND APP USER ID (use internal app ID, rather than google id to identify a user)
-            pool.query("SELECT user_id FROM AUTH_DATA WHERE auth_user_id = ?", VerifiedTokenPayload[0], (error, result) => { // value of app user id on row of google user id 
+            pool.query("SELECT user_id FROM user_profile WHERE google_user_id = ?", google_user_id, (error, result) => { // value of app user id on row of google user id 
                 if (error) throw console.log('Find user ID error: ', error);
                 user_id = result[0].user_id
                 var SuccessResponseArray = ["* Token verification SUCCESS: User logged in *", user_id]
-                response.cookie('APP_USER_ID', user_id) // passing the user's app ID to the browser. This is the SECOND token being set in the browser, this one corresponding to the user's ID in this app.
                 response.send(SuccessResponseArray)
             }); // FIND APP USER ID: END
         } // END OF IF/ELSE CLAUSE VERIFICATION CLAUSE
@@ -144,13 +144,13 @@ const router = app => {
             // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
             try {
 
-                pool.query("SELECT auth_user_id FROM AUTH_DATA WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id 
-                    console.log('Security check FE userId: ', FrontEndUserId)
+                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id 
+                    console.log('Security check FE user id: ', FrontEndUserId)
                     console.log('security check:', result)
-                    console.log('Security check Backend End Google ID: ', result[0].auth_user_id)
-                    StoredGoogleAuthID = result[0].auth_user_id
+                    console.log('Security check Backend End Google user ID: ', result[0].google_user_id)
+                    StoredGoogleAuthID = result[0].google_user_id
 
-                    if (FrontEndAuthUserId == StoredGoogleAuthID) {
+                    if (FrontEndAuthUserId == StoredGoogleUserID) {
                         console.log('Authorised user editing correct profile')
                         InsertData = { user_id: FrontEndUserId, content: VideoLink }
                         // ADD VIDEO LINK TO DATA BASE
@@ -181,9 +181,9 @@ const router = app => {
             // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
             try {
                 console.log(FrontEndUserId)
-                pool.query("SELECT auth_user_id FROM AUTH_DATA WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id                   
-                    StoredGoogleAuthID = result[0].auth_user_id
-                    if (FrontEndAuthUserId == StoredGoogleAuthID) {
+                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id                   
+                    StoredGoogleUserID = result[0].google_user_id
+                    if (FrontEndAuthUserId == StoredGoogleUserID) {
                         console.log('Authorised user editing correct profile')
                         response.send('User signed in')
                     } else {
