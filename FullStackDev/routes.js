@@ -42,7 +42,8 @@ async function verify(CLIENT_ID, token) {
 const router = app => {
 
 
-    // VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY: SET COOKIE VALUE IN BROWSER
+    // SIGN IN: DESCRIPTION 
+    //VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY: SET COOKIE VALUE IN BROWSER
     app.post('/SignIn', async (request, response) => {
         let token = request.body.token
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
@@ -87,7 +88,11 @@ const router = app => {
         }
     });
 
-    // An API CALL THAT REQUIRES VERIFICATION FIRST
+    // PROFILE ROUTE: DESCRIPTION: 
+    // 1) Validates token sent from FE
+    // 2) If valid, find google_user_id from verified token
+    // 3) Find associated (app) user Id
+    // 4) Send to FE
     app.post('/ProfileRoute', async (request, response) => {
         token = request.body.token
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
@@ -105,23 +110,30 @@ const router = app => {
                 response.send(SuccessResponseArray)
             }); // FIND APP USER ID: END
         } // END OF IF/ELSE CLAUSE VERIFICATION CLAUSE
-    }); // END OF POST: PROTECTED ROUTE
+    }); // END OF POST: PROFILE ROUTE
 
 
-    // 
+    // PROFILE PAGE: DESCRIPTION
+    // 1) Take query parameter from browser (this is what is seen in the browser's URL)
+    // 2) SELECT all fields from user_profile corresponding to the user's ID
+    // 3) Render (display) the user's profile page, with dynamically updated data for first name, user id and profile picture.
     app.get('/ProfilePage', (request, response) => {
         user_id = request.query.user_id // User Id set as a cookie in /ProfileRoute and retrieved in FE FROM the response (but also could have been retrieved from the cookie)
         // RETRIEVE APP USER DATA
-        pool.query("SELECT * FROM user_profile WHERE user_id = ?", user_id, (error, result) => {
-            if (error) console.log('retrieval error:', error);
-            user_data = result[0]
-            response.render("ProfilePage.ejs", {
-                data: {
-                    name: user_data.first_name, user_id: user_data.user_id,
-                    profile_picture: user_data.profile_picture
-                }
-            }); // END OF RESPONSE.RENDER PROTECTED PROFILE
-        }); // RETRIEVE APP USER DATA: END
+        try {
+            pool.query("SELECT * FROM user_profile WHERE user_id = ?", user_id, (error, result) => {
+                if (error) console.log('retrieval error:', error);
+                user_data = result[0]
+                response.render("ProfilePage.ejs", {
+                    data: {
+                        name: user_data.first_name, user_id: user_data.user_id,
+                        profile_picture: user_data.profile_picture
+                    }
+                }); // END OF RESPONSE.RENDER PROTECTED PROFILE
+            }); // RETRIEVE APP USER DATA: END
+        } catch (error) {
+            console.log('Error retrieving user data, error: ', error)
+        }
     }) // END OF GET: PROTECTED PROFILE
 
 
@@ -229,7 +241,6 @@ const router = app => {
     // SIGN OUT ROUTE
     app.get('/SignOut', (req, res) => {
         res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
-        res.clearCookie('APP_USER_ID'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
         console.log('Cookie cleared: logged out page redirection')
         res.redirect('/LoggedOutPage')
     })
@@ -240,21 +251,7 @@ const router = app => {
         res.render('LandingPage');
     })
 
-    // DELETE USER ROUTE: TO BE REMOVED IN FINAL VERSION, NOTE THIS SHOULD BE A 'DELETE' METHOD, NOT A 'GET' METHOD
-    app.get('/deleteuser', (request, response) => {
-        var UserToDelete = request.query.email
-        console.log('request to delete this data:', UserToDelete);
-        pool.query(`DELETE FROM auth_data WHERE email = '${UserToDelete}'`, (error, result) => {
-            if (error) throw error;
-            console.log('Delete response: ', result);
 
-            pool.query(`SELECT * FROM auth_data`, (error, result) => {
-                if (error) throw console.log('remiaing users error: ', error);
-            });
-        });
-        console.log('sign out redirection')
-        response.redirect('/SignOut') //to delete cookie
-    });
 
 };
 module.exports = router;

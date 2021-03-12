@@ -178,7 +178,10 @@
             }
         }
 
-        // A function to see a user's profile- requires sign in
+        // DESCRIPTION:
+        // 1) Take token from cookie in browser
+        // 2) Send token to BE
+        // 3) If BE verifies token is valid, take user ID and redirect Profile Page
         function ProfileRoute() {
             // Get token from browser
             var CookieToken = getCookieValue('USER_SESSION_TOKEN')
@@ -186,12 +189,11 @@
                 $.post('http://localhost:80/ProfileRoute', {
                     token: CookieToken
                 }).done(function (data) {
-
-                    if (data[0] == '* Token verification SUCCESS: User logged in *') {
+                    VerificationStatus = data[0]
+                    if (VerificationStatus == '* Token verification SUCCESS: User logged in *') {
                         alert('Verification success')
-                        user_id = data[1] // could have equivalently taken from the token in the browser
-
-                        // REDIRECT FROM PROFILE ROUTE TO PROFILE PAGE (Bounce from BE to FE and back to BE => Redundent if redirection can be done directly in BE)
+                        user_id = data[1]
+                        // Redirect back to BackEnd to render profile page
                         var BaseProfiledUrl = 'http://localhost/ProfilePage?user_id='
                         var ProfileUrl = BaseProfiledUrl + user_id
                         window.location.href = ProfileUrl
