@@ -129,11 +129,11 @@ const router = app => {
     app.post("/NewVideo", async (request, response) => {
 
         console.log('new video route')
-        token = request.body.token
+        FrontEndToken = request.body.token
         FrontEndUserId = request.body.ProfileId
         VideoLink = request.body.VideoLink
 
-        VerifiedTokenPayload = await verify(CLIENT_ID, token)
+        VerifiedTokenPayload = await verify(CLIENT_ID, FrontEndToken)
         var FrontEndAuthUserId = VerifiedTokenPayload[0] //Google user ID
 
         if (!VerifiedTokenPayload) { //if value == false
@@ -166,10 +166,38 @@ const router = app => {
                 console.log('Error from check that token matches profile')
             }
         }
-
-
-
     })
+
+    // CHECK IF PAGE VIEWER IS PAGE OWNER
+    app.get("/Owner", async (request, response) => {
+        FrontEndUserId = request.query.ProfileId
+        FrontEndToken = request.query.token
+
+        VerifiedTokenPayload = await verify(CLIENT_ID, FrontEndToken)
+        var FrontEndAuthUserId = VerifiedTokenPayload[0] //Google user ID
+        if (!VerifiedTokenPayload) { //if value == false
+            response.send('* Token verification FAIL: User not logged in *')
+        } else {
+            // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
+            try {
+                console.log(FrontEndUserId)
+                pool.query("SELECT auth_user_id FROM AUTH_DATA WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id                   
+                    StoredGoogleAuthID = result[0].auth_user_id
+                    if (FrontEndAuthUserId == StoredGoogleAuthID) {
+                        console.log('Authorised user editing correct profile')
+                        response.send('User signed in')
+                    } else {
+                        response.send('User not signed in')
+                    }
+                });
+            } catch (error) {
+                console.log('Error from check that token matches profile')
+            }
+        }
+    });
+
+
+
 
     // GET VIDEO
     app.get("/Video", (request, response) => {
@@ -178,7 +206,6 @@ const router = app => {
         // RETRIEVE USER CONTENT DATA
         pool.query("SELECT content FROM user_content WHERE user_id = ? ORDER BY row_num DESC LIMIT 1 ", user_id, (error, result) => { // ORDER BY/DESC => Last input value
             if (error) console.log('Content retrieval error:');
-            console.log(result)
             try {
                 user_content = result[0]
                 if (result.length === 0) {
@@ -201,7 +228,6 @@ const router = app => {
 
     // SIGN OUT ROUTE
     app.get('/SignOut', (req, res) => {
-        console.log('sign out route')
         res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
         res.clearCookie('APP_USER_ID'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
         console.log('Cookie cleared: logged out page redirection')

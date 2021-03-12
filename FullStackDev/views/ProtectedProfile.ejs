@@ -38,7 +38,7 @@
         <input type="text" name="YouTubeLink" placeholder="YouTube embed link">
         </br>
         <div>
-            <button id="VideoButton" onclick="NewVideo()">Submit</button>
+            <button id="VideoButton" onclick=NewVideo()>Submit</button>
             See <a href=" https://www.youtube.com/watch?v=kiyi-C7NQrQ" target="_blank">embed link</a>
         </div>
     </div>
@@ -56,6 +56,10 @@
                 McKiernan</a></p>
     </footer>
     <style>
+        #YouTubeForm {
+            display: none;
+        }
+
         input[readonly] {
             background-color: lightgray;
         }
@@ -135,10 +139,6 @@
 </body>
 
 <script>
-    //GET PAGE USER ID
-    var urlParams = new URLSearchParams(window.location.search);
-    var user_id = urlParams.get('user_id');
-
     // GET COOKIE FUNCTION
     function getCookieValue(cname) {
         var name = cname + "=";
@@ -156,8 +156,35 @@
         return "";
     }
 
+    //GET PAGE VARIABLES
+    var urlParams = new URLSearchParams(window.location.search);
+    var user_id = urlParams.get('user_id');
+    var CookieToken = getCookieValue('USER_SESSION_TOKEN')
+
+
+    // CHECK PROFILE OWNER
+    try {
+        $.get('http://localhost:80/Owner', {
+            token: CookieToken,
+            ProfileId: user_id,
+        }).done(function (data) {
+            console.log('Server response :', data)
+            if (data == 'User signed in') {
+                console.log('Logged user- edit rights')
+                $('#YouTubeForm').show() //show edit switch
+            } else {
+                console.log('Unlogged user- view only')
+            }
+        });
+    } catch (err) {
+        console.log('failed to post to backend')
+        console.log('Error: ' + err)
+    }
+
+
+
     function NewVideo() {
-        var CookieToken = getCookieValue('USER_SESSION_TOKEN')
+        console.log('new video function executed')
         link = document.getElementsByTagName("input")[0].value;
         console.log('User id cookie retrieved: ', user_id, 'with video: ', link)
         try { // CLOSE THIS CLAUSE
@@ -165,20 +192,18 @@
                 token: CookieToken,
                 ProfileId: user_id,
                 VideoLink: link
-
             }).done(function (data) {
                 console.log('Server response :', data)
                 if (data == 'New Video Saved') {
-                    window.location.href = window.location
-                        .href // refresh page after successfully saving a new video
+                    window.location.href = window.location.href
+                    // refresh page after successfully saving a new video
                 } else {
                     alert('Video not saved, please try again', data)
                 }
             });
         } catch (err) {
             console.log('failed to post to backend')
-            response.send('Error: ' + err)
-
+            console.log('Error: ' + err)
         }
     }
 
