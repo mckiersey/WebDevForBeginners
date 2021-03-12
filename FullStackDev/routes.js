@@ -69,7 +69,7 @@ const router = app => {
                     if (result.length === 0) {
                         console.log('No result from existing user query: Inserting new user into user_profile DB')
                         try {  //INSERT NEW USER INTO: USER_PROFILE
-                            pool.query('INSERT INTO user_profile SET?', google_user_data, (error, result) => {
+                            pool.query('INSERT INTO user_profile SET?', new_user_data, (error, result) => {
                             });
                         } catch (error) {
                             console.log('Unable to create new user, error: ', error)
@@ -120,14 +120,17 @@ const router = app => {
         // RETRIEVE APP USER DATA
         try {
             pool.query("SELECT * FROM user_profile WHERE user_id = ?", user_id, (error, result) => {
-                if (error) console.log('retrieval error:', error);
-                user_data = result[0]
-                response.render("ProfilePage.ejs", {
-                    data: {
-                        name: user_data.first_name, user_id: user_data.user_id,
-                        profile_picture: user_data.profile_picture
-                    }
-                }); // END OF RESPONSE.RENDER PROTECTED PROFILE
+                if (result.length === 0) {
+                    response.send('Error: User does not exist. Please enter an existing user id in the url.')
+                } else {
+                    user_data = result[0]
+                    response.render("ProfilePage.ejs", {
+                        data: {
+                            name: user_data.first_name, user_id: user_data.user_id,
+                            profile_picture: user_data.profile_picture
+                        }
+                    }); // END OF RESPONSE.RENDER PROTECTED PROFILE
+                }
             }); // RETRIEVE APP USER DATA: END
         } catch (error) {
             console.log('Error retrieving user data, error: ', error)
@@ -207,12 +210,9 @@ const router = app => {
     });
 
 
-
-
     // GET VIDEO
     app.get("/Video", (request, response) => {
         user_id = request.query.user_id
-        console.log(user_id)
         // RETRIEVE USER CONTENT DATA
         pool.query("SELECT content FROM user_content WHERE user_id = ? ORDER BY row_num DESC LIMIT 1 ", user_id, (error, result) => { // ORDER BY/DESC => Last input value
             if (error) console.log('Content retrieval error:');
@@ -246,7 +246,7 @@ const router = app => {
     // UNLOGGED LANDING PAGE
     app.get('/LoggedOutPage', (req, res) => {
         console.log('redirect to landing page')
-        res.render('LandingPage');
+        res.render('LoggedOutPage');
     })
 
 
