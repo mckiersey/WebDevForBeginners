@@ -32,7 +32,7 @@
     </div>
 
     <div class="Profile">
-        <input type="button" class="btn btn-light" id='ProfileButton' onClick=ProtectedRoute(); value="My Profile">
+        <input type="button" class="btn btn-light" id='ProfileButton' onClick=ProfileRoute(); value="My Profile">
         <h2 id="ProfileText">Private profile, which requires sign in</h2>
     </div>
 
@@ -178,12 +178,12 @@
             }
         }
 
-        // A protected route function
-        function ProtectedRoute() {
+        // A function to see a user's profile- requires sign in
+        function ProfileRoute() {
             // Get token from browser
             var CookieToken = getCookieValue('USER_SESSION_TOKEN')
             try {
-                $.post('http://localhost:80/ProtectedRoute', {
+                $.post('http://localhost:80/ProfileRoute', {
                     token: CookieToken
                 }).done(function (data) {
 

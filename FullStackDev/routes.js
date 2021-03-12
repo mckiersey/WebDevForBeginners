@@ -88,7 +88,7 @@ const router = app => {
     });
 
     // An API CALL THAT REQUIRES VERIFICATION FIRST
-    app.post('/ProtectedRoute', async (request, response) => {
+    app.post('/ProfileRoute', async (request, response) => {
         token = request.body.token
         VerifiedTokenPayload = await verify(CLIENT_ID, token)
 
@@ -109,13 +109,13 @@ const router = app => {
 
 
     // 
-    app.get('/ProtectedProfile', (request, response) => {
-        user_id = request.query.user_id // User Id set as a cookie in /ProtectedRoute and retrieved in FE FROM the response (but also could have been retrieved from the cookie)
+    app.get('/ProfilePage', (request, response) => {
+        user_id = request.query.user_id // User Id set as a cookie in /ProfileRoute and retrieved in FE FROM the response (but also could have been retrieved from the cookie)
         // RETRIEVE APP USER DATA
         pool.query("SELECT * FROM user_profile WHERE user_id = ?", user_id, (error, result) => {
             if (error) console.log('retrieval error:', error);
             user_data = result[0]
-            response.render("ProtectedProfile.ejs", {
+            response.render("ProfilePage.ejs", {
                 data: {
                     name: user_data.first_name, user_id: user_data.user_id,
                     profile_picture: user_data.profile_picture
