@@ -40,6 +40,18 @@ async function verify(CLIENT_ID, token) {
 const router = app => {
 
 
+    //////////////////////////////////////////////////////////////////
+    //// *** VIEW A PROFILE & SIGN IN *** ////
+    //////////////////////////////////////////////////////////////////
+
+    // HOME: DESCRIPTION
+    // 1) Display landing page
+    app.get('/home', (request, response) => {
+        homepage_file = "/homepage.html"
+        response.sendFile(homepage_file, { root: __dirname })
+    });
+
+
     // SIGN IN: DESCRIPTION 
     //VERIFY USER & POST NEW USER TO DATABASE IF NECESSARY: SET COOKIE VALUE IN BROWSER
     app.post('/SignIn', async (request, response) => {
@@ -114,7 +126,8 @@ const router = app => {
     // PROFILE PAGE: DESCRIPTION
     // 1) Take query parameter from browser (this is what is seen in the browser's URL)
     // 2) SELECT all fields from user_profile corresponding to the user's ID
-    // 3) Render (display) the user's profile page, with dynamically updated data for first name, user id and profile picture.
+    // 3) If no result is returned, send "User does not exist error", else;
+    // 4) Render (display) the user's profile page, with dynamically updated data for first name, user id and profile picture.
     app.get('/ProfilePage', (request, response) => {
         user_id = request.query.user_id // User Id set as a cookie in /ProfileRoute and retrieved in FE FROM the response (but also could have been retrieved from the cookie)
         // RETRIEVE APP USER DATA
@@ -130,7 +143,7 @@ const router = app => {
                             profile_picture: user_data.profile_picture
                         }
                     }); // END OF RESPONSE.RENDER PROTECTED PROFILE
-                }
+                } // END OF IF/ELSE CLAUSE
             }); // RETRIEVE APP USER DATA: END
         } catch (error) {
             console.log('Error retrieving user data, error: ', error)
@@ -138,79 +151,13 @@ const router = app => {
     }) // END OF GET: PROTECTED PROFILE
 
 
-    // POST NEW VIDEO
-    app.post("/NewVideo", async (request, response) => {
 
-        console.log('new video route')
-        FrontEndToken = request.body.token
-        FrontEndUserId = request.body.ProfileId
-        VideoLink = request.body.VideoLink
-
-        VerifiedTokenPayload = await verify(CLIENT_ID, FrontEndToken)
-        var FrontEndAuthUserId = VerifiedTokenPayload[0] //Google user ID
-
-        if (!VerifiedTokenPayload) { //if value == false
-            response.send('* Token verification FAIL: User not logged in *')
-
-        } else { //Token has been verified
-
-            // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
-            try {
-
-                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id 
-                    console.log('Security check FE user id: ', FrontEndUserId)
-                    console.log('security check:', result)
-                    console.log('Security check Backend End Google user ID: ', result[0].google_user_id)
-                    StoredGoogleAuthID = result[0].google_user_id
-
-                    if (FrontEndAuthUserId == StoredGoogleUserID) {
-                        console.log('Authorised user editing correct profile')
-                        InsertData = { user_id: FrontEndUserId, content: VideoLink }
-                        // ADD VIDEO LINK TO DATA BASE
-                        pool.query('INSERT INTO user_content SET ?', InsertData, (error, result) => {
-                            if (error) throw console.log('User profile DB error: ', error);
-                        });
-                        response.send('New Video Saved')
-                    } else {
-                        console.log('User not on correct profile')
-                    }
-                });
-            } catch (error) {
-                console.log('Error from check that token matches profile')
-            }
-        }
-    })
-
-    // CHECK IF PAGE VIEWER IS PAGE OWNER
-    app.get("/Owner", async (request, response) => {
-        FrontEndUserId = request.query.ProfileId
-        FrontEndToken = request.query.token
-
-        VerifiedTokenPayload = await verify(CLIENT_ID, FrontEndToken)
-        var FrontEndAuthUserId = VerifiedTokenPayload[0] //Google user ID
-        if (!VerifiedTokenPayload) { //if value == false
-            response.send('* Token verification FAIL: User not logged in *')
-        } else {
-            // Now we ensure that this token corresponds to the FrontEndUserId (the user Id seen in the browser url)
-            try {
-                console.log(FrontEndUserId)
-                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", FrontEndUserId, (error, result) => { // value of app user id on row of google user id                   
-                    StoredGoogleUserID = result[0].google_user_id
-                    if (FrontEndAuthUserId == StoredGoogleUserID) {
-                        console.log('Authorised user editing correct profile')
-                        response.send('User signed in')
-                    } else {
-                        response.send('User not signed in')
-                    }
-                });
-            } catch (error) {
-                console.log('Error from check that token matches profile')
-            }
-        }
-    });
-
-
-    // GET VIDEO
+    // GET VIDEO: DESCRIPTION
+    // FUNCTION: Populate profile with relevant data
+    // 1) Take profile page ID from browser
+    // 2) Select data in 'content' corresponding to this profile (user) ID
+    // 3) Rather than taking all data, select only the last row, which has the latest entry - this is an unsophisticated way of dealing with > 1 rows for a user (eg if a user submitted multiple videos)
+    // 4) Send this data back to the FrontEnd
     app.get("/Video", (request, response) => {
         user_id = request.query.user_id
         // RETRIEVE USER CONTENT DATA
@@ -230,23 +177,120 @@ const router = app => {
     });
 
 
-    // HOME PAGE ROUTE
-    app.get('/home', (request, response) => {
-        homepage_file = "/homepage.html"
-        response.sendFile(homepage_file, { root: __dirname })
+    //////////////////////////////////////////////////////////////////
+    //// *** EDIT PROFILE *** ////
+    //////////////////////////////////////////////////////////////////
+
+    /// THE FOLLOWING ROUTES REQUIRE TWO CONDITIONS:
+    // 1) THE USER IS SIGNED IN WITH A VALID TOKEN
+    // 2) THE USER IS ON HER OWN PAGE
+
+    // IF THESE CONDITIONS ARE MET, THE USER CAN EDIT HER PAGE.
+
+    // GET OWNER: DESCRIPTION
+    // FUNCTION: Check whether the profile viewer is the profile owner- e.g. are you viewing your own profile, or your friend's?
+    // 1) Verify token, taken from browser is valid
+    // 2) If valid, find google user id associated with valid token = FrontEndGoogleUserId
+    // 3) Find StoredGoogleUserId corresponding to profile (user) Id- taken from browser url
+    // 4) Compare FrontEndGoogleUserId (from token) with StoredGoogleUserID (corresponding to profile ID)
+    // 5) If both match, the logged in user (from token) has the same google ID as that which is associated with the profile user id => The logged in user is viewing her own profile, and not someone else's
+    app.get("/Owner", async (request, response) => {
+        ProfileUserId = request.query.ProfileId
+        token = request.query.token
+
+        VerifiedTokenPayload = await verify(CLIENT_ID, token)
+        var FrontEndGoogleUserId = VerifiedTokenPayload[0] //Google user ID
+        if (!VerifiedTokenPayload) { //if value == false
+            response.send('* Token verification FAIL: User not logged in *')
+        } else {
+            // Now we ensure that this token corresponds to the ProfileUserId (the user Id seen in the browser url)
+            try {
+                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", ProfileUserId, (error, result) => { // value of app user id on row of google user id                   
+                    StoredGoogleUserID = result[0].google_user_id
+                    if (FrontEndGoogleUserId == StoredGoogleUserID) {
+                        console.log('Authorised user editing correct profile')
+                        response.send('User is profile owner')
+                    } else {
+                        response.send('User is not profile owner')
+                    }
+                });
+            } catch (error) {
+                console.log('Error from check that token matches profile')
+            }
+        }
     });
+
+    // POST ADDVIDEO: DESCRIPTION
+    // FUNCTION: ENABLE USER TO ADD CONTENT (BUT ONLY TO HER PAGE)
+    // 1) Verify token, taken from browser is valid
+    // 2) If valid, find google user id associated with valid token = FrontEndGoogleUserId
+    // 3) Find StoredGoogleUserId corresponding to profile (user) Id- taken from browser url
+    // 4) Compare FrontEndGoogleUserId (from token) with StoredGoogleUserID (corresponding to profile ID)
+    // 5) If both match, the logged in user (from token) has the same google ID as that which is associated with the profile user id
+    // 6) Insert content (VideoLink) into user_content table
+
+    app.post("/AddVideo", async (request, response) => {
+
+        console.log('Add video route')
+        token = request.body.token
+        ProfileUserId = request.body.ProfileId
+        VideoLink = request.body.VideoLink
+
+        VerifiedTokenPayload = await verify(CLIENT_ID, token)
+        var FrontEndGoogleUserId = VerifiedTokenPayload[0] //Google user ID
+
+        if (!VerifiedTokenPayload) { //if value == false
+            response.send('* Token verification FAIL: User not logged in *')
+
+        } else { //Token has been verified
+
+            // Now we ensure that this token corresponds to the ProfileUserId (the user Id seen in the browser url)
+            try { // SELECT GOOGLE ID
+                pool.query("SELECT google_user_id FROM user_profile WHERE user_id = ?", ProfileUserId, (error, result) => { // value of app user id on row of google user id 
+
+                    StoredGoogleUserID = result[0].google_user_id
+
+                    if (FrontEndGoogleUserId == StoredGoogleUserID) {
+                        console.log('Authorised user editing correct profile')
+                        InsertData = { user_id: FrontEndUserId, content: VideoLink }
+                        // ADD VIDEO LINK TO DATA BASE
+                        try { // INSET VIDEO
+                            pool.query('INSERT INTO user_content SET ?', InsertData, (error, result) => {
+                            });
+                            response.send('New Video Added')
+                        } catch (error) {
+                            console.log('Something went wrong, video not added: ', error)
+                            response.send('Video not Added')
+                        }
+                    } else {
+                        console.log('FrontEnd token Id does not match BackEnd Google ID')
+                        response.send('Video not Added')
+                    }
+                }); // END OF: SELECT GOOGLE ID
+            } catch (error) {
+                console.log('Error from check that token matches profile')
+                response.send('Video not Added')
+            }
+        }
+    })
+
+
+
+    //////////////////////////////////////////////////////////////////
+    //// *** SIGN OUT *** ////
+    //////////////////////////////////////////////////////////////////
 
     // SIGN OUT ROUTE
     app.get('/SignOut', (req, res) => {
-        res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token.
-        console.log('Cookie cleared: logged out page redirection')
-        res.redirect('/LoggedOutPage')
+        res.clearCookie('USER_SESSION_TOKEN'); // This works by clearing the cookies from a user's browsers. No cookie = no token = user signed out.
+        res.send('CookieDeleted')
+        console.log('Cookie deleted')
     })
 
     // UNLOGGED LANDING PAGE
     app.get('/LoggedOutPage', (req, res) => {
-        console.log('redirect to landing page')
         res.render('LoggedOutPage');
+
     })
 
 

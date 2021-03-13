@@ -40,7 +40,7 @@
         <input type="text" name="YouTubeLink" placeholder="YouTube embed link">
         </br>
         <div>
-            <button class="btn btn-light" id="VideoButton" onclick=NewVideo()>Submit</button>
+            <button class="btn btn-light" id="VideoButton" onclick=AddVideo()>Submit</button>
             See how: <a href=" https://www.youtube.com/watch?v=kiyi-C7NQrQ" target="_blank"> Using embeded links</a>
         </div>
     </div>
@@ -163,7 +163,11 @@
     var user_id = urlParams.get('user_id');
     var CookieToken = getCookieValue('USER_SESSION_TOKEN')
 
-
+    // GET VIDEO
+    var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
+    $.get(GetVideoUrl, function (data, status) {
+        document.getElementById('VideoSection').innerHTML += `${data}`
+    });
 
 
     // CHECK PROFILE OWNER: DISPLAY SESSION STATUS
@@ -173,7 +177,7 @@
             ProfileId: user_id,
         }).done(function (data) {
             console.log('Server response :', data)
-            if (data == 'User signed in') {
+            if (data == 'User is profile owner') {
                 $('#YouTubeForm').show() //show edit switch
                 document.getElementById('SessionStatusText').innerHTML =
                     "<span style='color: RGB(170, 204, 0);'>Logged in</span>";
@@ -183,28 +187,27 @@
             }
         });
     } catch (err) {
-        console.log('failed to post to backend')
         console.log('Error: ' + err)
     }
 
 
 
-    function NewVideo() {
-        console.log('new video function executed')
-        link = document.getElementsByTagName("input")[0].value;
-        console.log('User id cookie retrieved: ', user_id, 'with video: ', link)
+    function AddVideo() {
+        console.log('Add video function executed')
+        link = document.getElementsByTagName("input")[0].value; // Retrieve submitted data 
+        console.log('To post: User id cookie retrieved: ', user_id, 'with video: ', link)
         try { // CLOSE THIS CLAUSE
-            $.post('http://localhost:80/NewVideo', {
+            $.post('http://localhost:80/AddVideo', {
                 token: CookieToken,
                 ProfileId: user_id,
                 VideoLink: link
             }).done(function (data) {
                 console.log('Server response :', data)
-                if (data == 'New Video Saved') {
+                if (data == 'New Video Added') {
                     window.location.href = window.location.href
                     // refresh page after successfully saving a new video
                 } else {
-                    alert('Video not saved, please try again', data)
+                    alert('Video not added, please try again', data)
                 }
             });
         } catch (err) {
@@ -212,14 +215,6 @@
             console.log('Error: ' + err)
         }
     }
-
-
-
-    // GET VIDEO
-    var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
-    $.get(GetVideoUrl, function (data, status) {
-        document.getElementById('VideoSection').innerHTML += `${data}`
-    });
 </script>
 
 

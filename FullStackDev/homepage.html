@@ -216,8 +216,11 @@
             try {
                 $.get(getUrl, {})
                     .done(function (data) {
-                        console.log('Sign out server response :', data)
-                        window.location.href = "http://localhost:80/LoggedOutPage"
+                        if (data = 'CookieDeleted') {
+                            window.location.href = "http://localhost:80/LoggedOutPage"
+                        } else {
+                            alert('Something went wrong, please try to sign out again.')
+                        }
                     });
             } catch (err) {
                 console.log('failed to post to backend')
