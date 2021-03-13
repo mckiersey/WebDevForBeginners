@@ -254,7 +254,7 @@ const router = app => {
 
                     if (FrontEndGoogleUserId == StoredGoogleUserID) {
                         console.log('Authorised user editing correct profile')
-                        InsertData = { user_id: FrontEndUserId, content: VideoLink }
+                        InsertData = { user_id: ProfileUserId, content: VideoLink }
                         // ADD VIDEO LINK TO DATA BASE
                         try { // INSET VIDEO
                             pool.query('INSERT INTO user_content SET ?', InsertData, (error, result) => {

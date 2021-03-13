@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Learning Web Dev</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id"
+        content="170958026096-1delfs3g8tg4hoeg6bgs5ickhpe7k5pt.apps.googleusercontent.com">
+    <!--JQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" type="text/javascript"></script>
+    <!-- ADD BOOTSTRAP-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <!-- See here: https://getbootstrap.com/docs/4.2/getting-started/introduction/  -->
+</head>
+
+<body>
+
+    <div id="SessionStatus">
+        <h2 id='SessionStatusText'></h2>
+        <input type="button" class="btn btn-light" id='SignOutButton' onClick=signOut(); value="Sign Out">
+    </div>
+
+    <h1>Web Dev: From Front to back</h1>
+    <p>Connecting a dynamic front end to NodeJS/Express sever</p>
+
+
+
+    <div class="SignIn">
+        <div class="g-signin2" data-onsuccess="onSignIn" id='SignInButton'></div>
+        <h2 id="SignInText">Sign in & authentication managed by Google</h2>
+    </div>
+
+    <div class="Profile">
+        <input type="button" class="btn btn-light" id='ProfileButton' onClick=ProfileRoute(); value="My Profile">
+        <h2 id="ProfileText">Sign in to see a profile</h2>
+    </div>
+
+    <footer>
+        <p>Image: Early morning, Cappadocia, Turkey | Taken by <a href="https://mckiersey.medium.com/"
+                target="_blank">Seán
+                McKiernan</a></p>
+    </footer>
