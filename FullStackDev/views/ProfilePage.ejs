@@ -160,17 +160,28 @@
 
     //GET PAGE VARIABLES
     var urlParams = new URLSearchParams(window.location.search);
-    var user_id = urlParams.get('user_id');
+    var user_id = urlParams.get(
+        'user_id'
+    ); // User ID seen in the browser URL- a user Id is synonymous with profile ID - each user has their own profile 
     var CookieToken = getCookieValue('USER_SESSION_TOKEN')
 
-    // GET VIDEO
+    // GET VIDEO REQUEST: DESCRIPTION
+    // FUNCTION: Display relevant video content corresponding to the profile user id
+    // 1) Send GET request to BackEnd route Video for content corresponding to user_id
+    // 2) Insert response data into section with ID tag = 'VideoSection'
     var GetVideoUrl = 'http://localhost:80/Video?user_id=' + user_id
     $.get(GetVideoUrl, function (data, status) {
         document.getElementById('VideoSection').innerHTML += `${data}`
     });
 
 
-    // CHECK PROFILE OWNER: DISPLAY SESSION STATUS
+    // GET OWNER REQUEST: DESCRIPTION
+    // FUNCTION: Check whether viewer is also owner of profile
+    // 1) Send GET requst to BacKEnd route Owner with token & profile user id
+    // 2) If token is valid and profile user Id matches stored google id, corresponding to token then;
+    // 3) Show hidden element with ID = YouTubeForm
+    // 4) And insert 'Logged in' text into section with ID tag = 'SessionStatusText'
+    // 5) Else, insert 'Unlogged' text into section with ID tag = 'SessionStatusText'
     try {
         $.get('http://localhost:80/Owner', {
             token: CookieToken,
@@ -191,7 +202,13 @@
     }
 
 
-
+    // POST ADD VIDEO REQUEST: DESCRIPTION
+    // FUNCTION: Allow proflie owner to add content to her own profile (and not someone else's)
+    // 1) Retrieve data submitted by user in 'YouTube Link' form
+    // 2) Send CookieToken, user profile id and submitted link to BackEnd route AddVideo
+    // 3) If token is valid and profile user Id matches stored google id, corresponding to token then;
+    // 4) Set the page 'location' = to the page 'location' => refresh the page. This automatic refresh upon success will then load the newly added video via the Video request, above
+    // 5) Else, send Alert
     function AddVideo() {
         console.log('Add video function executed')
         link = document.getElementsByTagName("input")[0].value; // Retrieve submitted data 

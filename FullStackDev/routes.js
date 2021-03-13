@@ -98,7 +98,8 @@ const router = app => {
         }
     });
 
-    // PROFILE ROUTE: DESCRIPTION: 
+    // POST PROFILE ROUTE: DESCRIPTION 
+    // FUNCTION: Deliever profile user id to FrontEnd based on the token given after a user signs in
     // 1) Validates token sent from FE
     // 2) If valid, find google_user_id from verified token
     // 3) Find associated (app) user Id
@@ -123,7 +124,8 @@ const router = app => {
     }); // END OF POST: PROFILE ROUTE
 
 
-    // PROFILE PAGE: DESCRIPTION
+    // GET PROFILEPAGE ROUTE: DESCRIPTION
+    // FUNCTION: Display a user's profile, with relevant data
     // 1) Take query parameter from browser (this is what is seen in the browser's URL)
     // 2) SELECT all fields from user_profile corresponding to the user's ID
     // 3) If no result is returned, send "User does not exist error", else;
@@ -152,7 +154,7 @@ const router = app => {
 
 
 
-    // GET VIDEO: DESCRIPTION
+    // GET VIDEO ROUTE: DESCRIPTION
     // FUNCTION: Populate profile with relevant data
     // 1) Take profile page ID from browser
     // 2) Select data in 'content' corresponding to this profile (user) ID
@@ -187,7 +189,7 @@ const router = app => {
 
     // IF THESE CONDITIONS ARE MET, THE USER CAN EDIT HER PAGE.
 
-    // GET OWNER: DESCRIPTION
+    // GET OWNER ROUTE: DESCRIPTION
     // FUNCTION: Check whether the profile viewer is the profile owner- e.g. are you viewing your own profile, or your friend's?
     // 1) Verify token, taken from browser is valid
     // 2) If valid, find google user id associated with valid token = FrontEndGoogleUserId
@@ -220,7 +222,7 @@ const router = app => {
         }
     });
 
-    // POST ADDVIDEO: DESCRIPTION
+    // POST ADDVIDEO ROUTE: DESCRIPTION
     // FUNCTION: ENABLE USER TO ADD CONTENT (BUT ONLY TO HER PAGE)
     // 1) Verify token, taken from browser is valid
     // 2) If valid, find google user id associated with valid token = FrontEndGoogleUserId
