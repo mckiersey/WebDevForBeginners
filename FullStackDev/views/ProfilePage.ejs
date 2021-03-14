@@ -160,9 +160,8 @@
 
     //GET PAGE VARIABLES
     var urlParams = new URLSearchParams(window.location.search);
-    var user_id = urlParams.get(
-        'user_id'
-    ); // User ID seen in the browser URL- a user Id is synonymous with profile ID - each user has their own profile 
+    var user_id = urlParams.get('user_id');
+    // User ID seen in the browser URL- a user Id is synonymous with profile ID - each user has their own profile 
     var CookieToken = getCookieValue('USER_SESSION_TOKEN')
 
     // GET VIDEO REQUEST: DESCRIPTION
