@@ -1,5 +1,5 @@
-#(Probably) The Most Complete Beginner’s Guide To Web Dev
-Or, Full Stack For People Who Know Nothing About Full Stack
+**(Probably) The Most Complete Beginner’s Guide To Web Dev**
+
 
 This repo will support a long form tutorial which will bring absolute beginners from their first html <div> to the final javascript function. 
 
